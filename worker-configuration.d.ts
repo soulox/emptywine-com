@@ -4,6 +4,7 @@
 declare namespace Cloudflare {
 	interface Env {
 		AI: Ai;
+		CONTACTS: KVNamespace;
 	}
 }
 interface Env extends Cloudflare.Env {}

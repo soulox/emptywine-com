@@ -6,6 +6,9 @@
   "ai": {
     "binding": "AI"
   },
+  "kv_namespaces": [
+    { "binding": "CONTACTS", "id": "REPLACE_WITH_YOUR_KV_NAMESPACE_ID" }
+  ],
   "observability": {
     "enabled": true
   }

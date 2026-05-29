@@ -36,8 +36,21 @@ export default {
       });
     }
 
-    // POST /api/contact → accept form, return success
+    // POST /api/contact → store submission in KV, return success
     if (method === 'POST' && pathname === '/api/contact') {
+      const body = await request.json() as {
+        name?: string; company?: string; email?: string; phone?: string; message?: string;
+      };
+      const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      await env.CONTACTS.put(`contact:${id}`, JSON.stringify({
+        id,
+        name: body.name ?? '',
+        company: body.company ?? '',
+        email: body.email ?? '',
+        phone: body.phone ?? '',
+        message: body.message ?? '',
+        receivedAt: new Date().toISOString(),
+      }));
       return new Response(JSON.stringify({ success: true }), {
         headers: { 'content-type': 'application/json' },
       });
