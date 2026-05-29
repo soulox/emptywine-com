@@ -237,6 +237,63 @@ export const LANDING_PAGE = `<!DOCTYPE html>
     opacity: 0.6;
   }
 
+  /* ─── HERO TWO-COLUMN LAYOUT ─────────────────── */
+  .hero-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 80px;
+    width: 100%;
+    max-width: 1100px;
+  }
+
+  .hero-content {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+  }
+
+  .hero-content h1 { max-width: 520px; }
+
+  .hero-content .hero-badge::before,
+  .hero-content .hero-badge::after { display: none; }
+
+  .hero-content .hero-divider {
+    width: 200px;
+    justify-content: flex-start;
+  }
+
+  .hero-visual {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .bottle-svg {
+    width: 170px;
+    height: auto;
+    filter: drop-shadow(0 32px 56px rgba(0,0,0,0.75)) drop-shadow(0 0 48px rgba(201,168,76,0.14));
+    animation: bottleFloat 7s ease-in-out infinite;
+  }
+
+  @keyframes bottleFloat {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-14px); }
+  }
+
+  @media (max-width: 900px) {
+    .hero-inner { flex-direction: column; text-align: center; }
+    .hero-content { text-align: center; }
+    .hero-visual { order: -1; }
+    .bottle-svg { width: 110px; }
+    .hero-content .hero-badge::before,
+    .hero-content .hero-badge::after { display: block; }
+    .hero-content .hero-divider { width: 280px; justify-content: center; }
+  }
+
   /* ─── TRUST BAR ───────────────────────────────── */
   #trust {
     border-top: 1px solid rgba(90,80,64,0.25);
@@ -793,17 +850,96 @@ export const LANDING_PAGE = `<!DOCTYPE html>
 <!-- ─── HERO ──────────────────────────────────── -->
 <section id="hero">
   <div class="hero-glow" aria-hidden="true"></div>
-  <span class="hero-badge">Bespoke Corporate Gifting</span>
-  <h1>Turn Every Bottle Into a&nbsp;Brand Moment</h1>
-  <p class="hero-sub">Custom AI-designed wine labels that carry your brand into every boardroom, celebration, and thank-you. Curated wine. Unforgettable first impression.</p>
-  <div class="hero-actions">
-    <a href="#pricing" class="btn-primary">See Pricing</a>
-    <a href="#process" class="btn-ghost">How It Works</a>
-  </div>
-  <div class="hero-divider" aria-hidden="true">
-    <div class="hero-divider-line"></div>
-    <div class="hero-divider-diamond"></div>
-    <div class="hero-divider-line"></div>
+  <div class="hero-inner">
+    <div class="hero-content">
+      <span class="hero-badge">Bespoke Corporate Gifting</span>
+      <h1>Turn Every Bottle Into a&nbsp;Brand Moment</h1>
+      <p class="hero-sub">Custom AI-designed wine labels that carry your brand into every boardroom, celebration, and thank-you. Curated wine. Unforgettable first impression.</p>
+      <div class="hero-actions">
+        <a href="#pricing" class="btn-primary">See Pricing</a>
+        <a href="#process" class="btn-ghost">How It Works</a>
+      </div>
+      <div class="hero-divider" aria-hidden="true">
+        <div class="hero-divider-line"></div>
+        <div class="hero-divider-diamond"></div>
+        <div class="hero-divider-line"></div>
+      </div>
+    </div>
+    <div class="hero-visual" aria-hidden="true">
+      <svg class="bottle-svg" viewBox="0 0 200 540" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="bGlass" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#0a1a0e"/>
+            <stop offset="20%" stop-color="#102010"/>
+            <stop offset="45%" stop-color="#1a3020"/>
+            <stop offset="65%" stop-color="#142818"/>
+            <stop offset="100%" stop-color="#091208"/>
+          </linearGradient>
+          <linearGradient id="bGold" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#7a5c1c"/>
+            <stop offset="35%" stop-color="#c9a84c"/>
+            <stop offset="62%" stop-color="#e8d080"/>
+            <stop offset="100%" stop-color="#8a6820"/>
+          </linearGradient>
+          <linearGradient id="bHighlight" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="rgba(255,255,255,0)"/>
+            <stop offset="40%" stop-color="rgba(255,255,255,0.09)"/>
+            <stop offset="55%" stop-color="rgba(255,255,255,0.14)"/>
+            <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+          </linearGradient>
+          <linearGradient id="bLabel" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#100f0d"/>
+            <stop offset="100%" stop-color="#1c1916"/>
+          </linearGradient>
+          <linearGradient id="bShadowBottom" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="rgba(0,0,0,0)"/>
+            <stop offset="100%" stop-color="rgba(0,0,0,0.55)"/>
+          </linearGradient>
+          <filter id="bAmbient" x="-40%" y="-15%" width="180%" height="130%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="14" result="blur"/>
+            <feFlood flood-color="#c9a84c" flood-opacity="0.13" result="color"/>
+            <feComposite in="color" in2="blur" operator="in" result="glow"/>
+            <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <!-- Floor shadow -->
+        <ellipse cx="100" cy="534" rx="46" ry="6" fill="rgba(0,0,0,0.45)"/>
+        <g filter="url(#bAmbient)">
+          <!-- Bottle body -->
+          <path d="M62,510 C40,510 38,495 38,480 L38,310 C38,295 42,280 47,265 L52,235 C56,215 60,195 62,175 L62,130 C62,118 66,108 72,104 L72,76 C72,65 78,60 86,58 L114,58 C122,60 128,65 128,76 L128,104 C134,108 138,118 138,130 L138,175 C140,195 144,215 148,235 L153,265 C158,280 162,295 162,310 L162,480 C162,495 160,510 138,510 Z" fill="url(#bGlass)"/>
+          <!-- Glass highlight -->
+          <path d="M62,490 L62,270 C62,250 64,232 66,214 L67,175 L68,130 L70,82 L76,72 L76,132 L74,178 L72,220 C70,240 68,258 68,278 L68,492 Z" fill="url(#bHighlight)"/>
+          <!-- Capsule -->
+          <rect x="72" y="28" width="56" height="34" rx="10" fill="url(#bGold)"/>
+          <rect x="72" y="57" width="56" height="5" fill="rgba(0,0,0,0.28)"/>
+          <rect x="76" y="30" width="13" height="28" rx="5" fill="rgba(255,255,255,0.11)"/>
+          <!-- Cork top -->
+          <rect x="84" y="14" width="32" height="18" rx="9" fill="#c8b88a"/>
+          <rect x="88" y="15" width="10" height="14" rx="5" fill="rgba(255,255,255,0.18)"/>
+          <!-- Label -->
+          <rect x="44" y="295" width="112" height="154" rx="2" fill="url(#bLabel)" stroke="#c9a84c" stroke-width="0.8"/>
+          <rect x="49" y="300" width="102" height="144" rx="1" fill="none" stroke="rgba(201,168,76,0.22)" stroke-width="0.5"/>
+          <!-- Label top rule -->
+          <line x1="58" y1="316" x2="142" y2="316" stroke="url(#bGold)" stroke-width="0.7"/>
+          <!-- Small ornament -->
+          <text x="100" y="332" text-anchor="middle" font-size="8" fill="rgba(201,168,76,0.45)" font-family="Georgia,serif">✦</text>
+          <!-- Brand name -->
+          <text x="100" y="358" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="20" fill="#c9a84c" letter-spacing="0.5">emptywine</text>
+          <!-- Under-brand rule -->
+          <line x1="62" y1="366" x2="138" y2="366" stroke="#c9a84c" stroke-width="0.4" opacity="0.45"/>
+          <!-- Wine type -->
+          <text x="100" y="382" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="6" fill="#a09880" letter-spacing="3">GRAND RESERVE</text>
+          <!-- Vintage -->
+          <text x="100" y="410" text-anchor="middle" font-family="Georgia,serif" font-size="11" fill="#7a7060" letter-spacing="2">2 0 2 5</text>
+          <!-- Bottom rule -->
+          <line x1="58" y1="424" x2="142" y2="424" stroke="url(#bGold)" stroke-width="0.7"/>
+          <!-- Bottom ornament -->
+          <text x="100" y="438" text-anchor="middle" font-size="8" fill="rgba(201,168,76,0.45)" font-family="Georgia,serif">✦</text>
+          <!-- Base shadow overlay -->
+          <path d="M38,460 L38,510 C40,510 62,510 138,510 C160,510 162,510 162,510 L162,460 Z" fill="url(#bShadowBottom)" opacity="0.4"/>
+        </g>
+      </svg>
+    </div>
   </div>
 </section>
 
