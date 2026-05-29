@@ -12,6 +12,22 @@ export default {
       });
     }
 
+    // GET /api/hero-image → photorealistic wine bottle, KV-cached
+    if (method === 'GET' && pathname === '/api/hero-image') {
+      const cached = await env.CONTACTS.get('hero:bottle', 'arrayBuffer');
+      if (cached) {
+        return new Response(cached, {
+          headers: { 'content-type': 'image/png', 'cache-control': 'public, max-age=604800' },
+        });
+      }
+      const prompt = 'professional product photography of a single luxury wine bottle, elegant custom label with gold foil lettering, dark marble surface, dramatic studio lighting, pure black background, shallow depth of field, 8k, photorealistic, no text';
+      const image = await env.AI.run('@cf/stabilityai/stable-diffusion-xl-base-1.0', { prompt });
+      await env.CONTACTS.put('hero:bottle', image, { expirationTtl: 604800 });
+      return new Response(image, {
+        headers: { 'content-type': 'image/png', 'cache-control': 'public, max-age=604800' },
+      });
+    }
+
     // POST /api/generate → AI image generation
     if (method === 'POST' && pathname === '/api/generate') {
       let company = 'your company';
