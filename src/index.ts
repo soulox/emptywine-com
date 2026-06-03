@@ -21,9 +21,10 @@ export default {
         });
       }
       const prompt = 'professional product photography of a single luxury wine bottle, elegant custom label with gold foil lettering, dark marble surface, dramatic studio lighting, pure black background, shallow depth of field, 8k, photorealistic, no text';
-      const image = await env.AI.run('@cf/stabilityai/stable-diffusion-xl-base-1.0', { prompt });
-      await env.CONTACTS.put('hero:bottle', image, { expirationTtl: 604800 });
-      return new Response(image, {
+      const stream = await env.AI.run('@cf/stabilityai/stable-diffusion-xl-base-1.0', { prompt });
+      const buffer = await new Response(stream).arrayBuffer();
+      await env.CONTACTS.put('hero:bottle', buffer, { expirationTtl: 604800 });
+      return new Response(buffer, {
         headers: { 'content-type': 'image/png', 'cache-control': 'public, max-age=604800' },
       });
     }
