@@ -9,6 +9,9 @@
   "kv_namespaces": [
     { "binding": "CONTACTS", "id": "e352b3b6fbd749efb49fd1a9db09169b" }
   ],
+  "r2_buckets": [
+    { "binding": "ASSETS", "bucket_name": "emptywine-assets" }
+  ],
   "observability": {
     "enabled": true
   }

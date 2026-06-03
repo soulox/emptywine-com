@@ -1,4 +1,5 @@
 import { LANDING_PAGE } from './landing';
+import { PREVIEW_PAGE } from './preview';
 
 const PROMPTS: Record<string, string> = {
   hero: 'single luxury wine bottle, dark emerald green glass, elegant ivory rectangular label with thin gold border, pure gloss black background, dramatic key light from upper left casting long shadow, shallow depth of field, commercial product photography, 85mm prime lens, 8k',
@@ -32,6 +33,29 @@ export default {
     if (method === 'GET' && pathname === '/') {
       return new Response(LANDING_PAGE, {
         headers: { 'content-type': 'text/html;charset=UTF-8' },
+      });
+    }
+
+    // GET /preview → label preview builder
+    if (method === 'GET' && pathname === '/preview') {
+      return new Response(PREVIEW_PAGE, {
+        headers: { 'content-type': 'text/html;charset=UTF-8' },
+      });
+    }
+
+    // GET /assets/* → serve from R2
+    if (method === 'GET' && pathname.startsWith('/assets/')) {
+      const key = decodeURIComponent(pathname.slice('/assets/'.length));
+      if (!key) return new Response('Not Found', { status: 404 });
+      const obj = await env.ASSETS.get(key);
+      if (!obj) return new Response('Not Found', { status: 404 });
+      const ct = obj.httpMetadata?.contentType ?? 'application/octet-stream';
+      return new Response(obj.body, {
+        headers: {
+          'content-type': ct,
+          'cache-control': 'public, max-age=86400',
+          'etag': obj.etag,
+        },
       });
     }
 
