@@ -274,14 +274,16 @@ export const LANDING_PAGE = `<!DOCTYPE html>
 
   .bottle-wrap {
     position: relative;
-    width: 260px;
-    height: 420px;
+    width: 420px;
+    height: 560px;
+    border-radius: 4px;
+    overflow: hidden;
   }
 
   .bottle-skeleton {
     position: absolute;
     inset: 0;
-    border-radius: 8px;
+    border-radius: 4px;
     background: linear-gradient(110deg, #1a1815 30%, #2a2520 50%, #1a1815 70%);
     background-size: 200% 100%;
     animation: shimmerSkeleton 1.6s linear infinite;
@@ -297,12 +299,13 @@ export const LANDING_PAGE = `<!DOCTYPE html>
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    border-radius: 8px;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 4px;
     opacity: 0;
-    transition: opacity 0.6s ease;
-    filter: drop-shadow(0 24px 48px rgba(0,0,0,0.8)) drop-shadow(0 0 40px rgba(201,168,76,0.12));
-    animation: bottleFloat 7s ease-in-out infinite;
+    transition: opacity 0.8s ease;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.9), 0 0 60px rgba(201,168,76,0.1), inset 0 0 0 1px rgba(201,168,76,0.08);
+    animation: bottleFloat 8s ease-in-out infinite;
   }
 
   .bottle-img.loaded {
@@ -311,14 +314,19 @@ export const LANDING_PAGE = `<!DOCTYPE html>
 
   @keyframes bottleFloat {
     0%, 100% { transform: translateY(0); }
-    50%       { transform: translateY(-12px); }
+    50%       { transform: translateY(-10px); }
+  }
+
+  @media (max-width: 1100px) {
+    .bottle-wrap { width: 340px; height: 460px; }
+    .hero-inner { gap: 48px; }
   }
 
   @media (max-width: 900px) {
-    .hero-inner { flex-direction: column; text-align: center; }
+    .hero-inner { flex-direction: column; text-align: center; gap: 40px; }
     .hero-content { text-align: center; }
     .hero-visual { order: -1; }
-    .bottle-wrap { width: 180px; height: 290px; }
+    .bottle-wrap { width: 280px; height: 360px; }
     .hero-content .hero-badge::before,
     .hero-content .hero-badge::after { display: block; }
     .hero-content .hero-divider { width: 280px; justify-content: center; }

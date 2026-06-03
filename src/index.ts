@@ -14,16 +14,16 @@ export default {
 
     // GET /api/hero-image → photorealistic wine bottle, KV-cached
     if (method === 'GET' && pathname === '/api/hero-image') {
-      const cached = await env.CONTACTS.get('hero:bottle', 'arrayBuffer');
+      const cached = await env.CONTACTS.get('hero:bottle:v2', 'arrayBuffer');
       if (cached) {
         return new Response(cached, {
           headers: { 'content-type': 'image/png', 'cache-control': 'public, max-age=604800' },
         });
       }
-      const prompt = 'professional product photography of a single luxury wine bottle, elegant custom label with gold foil lettering, dark marble surface, dramatic studio lighting, pure black background, shallow depth of field, 8k, photorealistic, no text';
+      const prompt = 'close-up luxury wine bottle center frame, ornate label with intricate gold foil calligraphy, botanical illustration, embossed crest, cream parchment paper texture, dark emerald glass bottle, pure black background, dramatic chiaroscuro studio lighting, ultra detailed label design, editorial product photography, 8k, photorealistic, no watermark';
       const stream = await env.AI.run('@cf/stabilityai/stable-diffusion-xl-base-1.0', { prompt });
       const buffer = await new Response(stream).arrayBuffer();
-      await env.CONTACTS.put('hero:bottle', buffer, { expirationTtl: 604800 });
+      await env.CONTACTS.put('hero:bottle:v2', buffer, { expirationTtl: 604800 });
       return new Response(buffer, {
         headers: { 'content-type': 'image/png', 'cache-control': 'public, max-age=604800' },
       });
