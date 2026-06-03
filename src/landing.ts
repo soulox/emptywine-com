@@ -272,44 +272,17 @@ export const LANDING_PAGE = `<!DOCTYPE html>
     justify-content: center;
   }
 
-  .bottle-wrap {
-    position: relative;
-    width: 420px;
-    height: 560px;
-    border-radius: 4px;
-    overflow: hidden;
+  .bottles-showcase {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
   }
 
-  .bottle-skeleton {
-    position: absolute;
-    inset: 0;
-    border-radius: 4px;
-    background: linear-gradient(110deg, #1a1815 30%, #2a2520 50%, #1a1815 70%);
-    background-size: 200% 100%;
-    animation: shimmerSkeleton 1.6s linear infinite;
-  }
-
-  @keyframes shimmerSkeleton {
-    0%   { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-  }
-
-  .bottle-img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-    border-radius: 4px;
-    opacity: 0;
-    transition: opacity 0.8s ease;
-    box-shadow: 0 32px 80px rgba(0,0,0,0.9), 0 0 60px rgba(201,168,76,0.1), inset 0 0 0 1px rgba(201,168,76,0.08);
+  .bottles-svg {
+    width: 400px;
+    height: auto;
+    filter: drop-shadow(0 40px 60px rgba(0,0,0,0.7));
     animation: bottleFloat 8s ease-in-out infinite;
-  }
-
-  .bottle-img.loaded {
-    opacity: 1;
   }
 
   @keyframes bottleFloat {
@@ -318,7 +291,7 @@ export const LANDING_PAGE = `<!DOCTYPE html>
   }
 
   @media (max-width: 1100px) {
-    .bottle-wrap { width: 340px; height: 460px; }
+    .bottles-svg { width: 320px; }
     .hero-inner { gap: 48px; }
   }
 
@@ -326,7 +299,7 @@ export const LANDING_PAGE = `<!DOCTYPE html>
     .hero-inner { flex-direction: column; text-align: center; gap: 40px; }
     .hero-content { text-align: center; }
     .hero-visual { order: -1; }
-    .bottle-wrap { width: 280px; height: 360px; }
+    .bottles-svg { width: 260px; }
     .hero-content .hero-badge::before,
     .hero-content .hero-badge::after { display: block; }
     .hero-content .hero-divider { width: 280px; justify-content: center; }
@@ -904,9 +877,86 @@ export const LANDING_PAGE = `<!DOCTYPE html>
       </div>
     </div>
     <div class="hero-visual">
-      <div class="bottle-wrap">
-        <div class="bottle-skeleton" id="bottle-skeleton"></div>
-        <img id="hero-bottle" class="bottle-img" alt="emptywine custom label bottle" />
+      <div class="bottles-showcase">
+        <svg class="bottles-svg" viewBox="0 0 340 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Two emptywine bottles with custom labels">
+          <defs>
+            <linearGradient id="gGlass" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%"   stop-color="#07100a"/>
+              <stop offset="22%"  stop-color="#112016"/>
+              <stop offset="48%"  stop-color="#1c301e"/>
+              <stop offset="75%"  stop-color="#0e1c10"/>
+              <stop offset="100%" stop-color="#050c06"/>
+            </linearGradient>
+            <linearGradient id="gCapsule" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%"   stop-color="#6a4e14"/>
+              <stop offset="38%"  stop-color="#c9a84c"/>
+              <stop offset="65%"  stop-color="#e8d07a"/>
+              <stop offset="100%" stop-color="#7a5c18"/>
+            </linearGradient>
+            <linearGradient id="gHighlight" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%"   stop-color="rgba(255,255,255,0)"/>
+              <stop offset="35%"  stop-color="rgba(255,255,255,0.07)"/>
+              <stop offset="52%"  stop-color="rgba(255,255,255,0.13)"/>
+              <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+            </linearGradient>
+            <linearGradient id="gLabel" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stop-color="#fdf9f2"/>
+              <stop offset="100%" stop-color="#f0e8d8"/>
+            </linearGradient>
+            <linearGradient id="gLabelB" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stop-color="#0c0b09"/>
+              <stop offset="100%" stop-color="#1a1714"/>
+            </linearGradient>
+            <filter id="fShadow">
+              <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="rgba(0,0,0,0.85)"/>
+            </filter>
+          </defs>
+
+          <!-- Floor shadows -->
+          <ellipse cx="100" cy="490" rx="58" ry="7" fill="rgba(0,0,0,0.45)"/>
+          <ellipse cx="248" cy="490" rx="58" ry="7" fill="rgba(0,0,0,0.45)"/>
+
+          <!-- ── BOTTLE A — cream label (left) ── -->
+          <g filter="url(#fShadow)">
+            <path d="M46,478 L46,228 C46,212 52,198 63,188 L80,160 L80,48 L120,48 L120,160 L137,188 C148,198 154,212 154,228 L154,478 Z" fill="url(#gGlass)"/>
+            <path d="M46,460 L46,228 C46,212 52,198 63,188 L80,160 L80,48 L90,48 L90,160 L76,187 C67,197 58,211 58,227 L58,462 Z" fill="url(#gHighlight)"/>
+            <rect x="76" y="22" width="48" height="30" rx="9" fill="url(#gCapsule)"/>
+            <rect x="80" y="23" width="14" height="26" rx="6" fill="rgba(255,255,255,0.1)"/>
+            <rect x="87" y="10" width="26" height="16" rx="8" fill="#cdbf9a"/>
+            <!-- Cream label -->
+            <rect x="50" y="272" width="100" height="140" rx="1" fill="url(#gLabel)"/>
+            <rect x="55" y="277" width="90"  height="130" rx="1" fill="none" stroke="#c9a84c" stroke-width="0.9"/>
+            <rect x="60" y="282" width="80"  height="120" rx="0" fill="none" stroke="rgba(201,168,76,0.3)" stroke-width="0.4"/>
+            <line x1="66" y1="295" x2="134" y2="295" stroke="#c9a84c" stroke-width="0.7"/>
+            <text x="100" y="327" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="20" fill="#1c150e" letter-spacing="0.5">emptywine</text>
+            <line x1="70"  y1="335" x2="130" y2="335" stroke="#c9a84c" stroke-width="0.5" opacity="0.6"/>
+            <text x="100" y="350" text-anchor="middle" font-family="Arial,sans-serif" font-size="6" fill="#7a6040" letter-spacing="3.5">ROUGE RÉSERVE</text>
+            <line x1="80"  y1="360" x2="120" y2="360" stroke="rgba(201,168,76,0.5)" stroke-width="0.4"/>
+            <text x="100" y="376" text-anchor="middle" font-family="Georgia,serif" font-size="10" fill="#9a8060" letter-spacing="2">2 0 2 5</text>
+            <line x1="66" y1="390" x2="134" y2="390" stroke="#c9a84c" stroke-width="0.7"/>
+            <text x="100" y="403" text-anchor="middle" font-size="7" fill="#c9a84c" opacity="0.55" font-family="Georgia,serif">◆</text>
+          </g>
+
+          <!-- ── BOTTLE B — dark label (right) ── -->
+          <g filter="url(#fShadow)">
+            <path d="M194,478 L194,228 C194,212 200,198 211,188 L228,160 L228,48 L268,48 L268,160 L285,188 C296,198 302,212 302,228 L302,478 Z" fill="url(#gGlass)"/>
+            <path d="M194,460 L194,228 C194,212 200,198 211,188 L228,160 L228,48 L238,48 L238,160 L224,187 C215,197 206,211 206,227 L206,462 Z" fill="url(#gHighlight)"/>
+            <rect x="224" y="22" width="48" height="30" rx="9" fill="url(#gCapsule)"/>
+            <rect x="228" y="23" width="14" height="26" rx="6" fill="rgba(255,255,255,0.1)"/>
+            <rect x="235" y="10" width="26" height="16" rx="8" fill="#cdbf9a"/>
+            <!-- Dark label -->
+            <rect x="198" y="272" width="100" height="140" rx="1" fill="url(#gLabelB)" stroke="#c9a84c" stroke-width="0.9"/>
+            <rect x="203" y="277" width="90"  height="130" rx="1" fill="none" stroke="rgba(201,168,76,0.25)" stroke-width="0.4"/>
+            <line x1="214" y1="295" x2="282" y2="295" stroke="#c9a84c" stroke-width="0.7"/>
+            <text x="248" y="327" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="20" fill="#c9a84c" letter-spacing="0.5">emptywine</text>
+            <line x1="218" y1="335" x2="278" y2="335" stroke="#c9a84c" stroke-width="0.5" opacity="0.6"/>
+            <text x="248" y="350" text-anchor="middle" font-family="Arial,sans-serif" font-size="6" fill="#a08858" letter-spacing="3.5">BLANC PRESTIGE</text>
+            <line x1="228" y1="360" x2="268" y2="360" stroke="rgba(201,168,76,0.5)" stroke-width="0.4"/>
+            <text x="248" y="376" text-anchor="middle" font-family="Georgia,serif" font-size="10" fill="#7a6840" letter-spacing="2">2 0 2 5</text>
+            <line x1="214" y1="390" x2="282" y2="390" stroke="#c9a84c" stroke-width="0.7"/>
+            <text x="248" y="403" text-anchor="middle" font-size="7" fill="#c9a84c" opacity="0.55" font-family="Georgia,serif">◆</text>
+          </g>
+        </svg>
       </div>
     </div>
   </div>
@@ -1107,17 +1157,6 @@ export const LANDING_PAGE = `<!DOCTYPE html>
 <script>
   (function () {
     'use strict';
-
-    // ── Hero bottle image ──────────────────────
-    var bottleImg = document.getElementById('hero-bottle');
-    var bottleSkeleton = document.getElementById('bottle-skeleton');
-    if (bottleImg) {
-      bottleImg.addEventListener('load', function () {
-        bottleImg.classList.add('loaded');
-        if (bottleSkeleton) bottleSkeleton.style.display = 'none';
-      });
-      bottleImg.src = '/api/hero-image';
-    }
 
     // ── Nav scroll effect ──────────────────────
     var nav = document.getElementById('nav');
