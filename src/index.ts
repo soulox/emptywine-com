@@ -2,14 +2,15 @@ import { LANDING_PAGE } from './landing';
 import { PREVIEW_PAGE } from './preview';
 
 const PROMPTS: Record<string, string> = {
-  hero: 'single luxury wine bottle, dark emerald green glass, elegant ivory rectangular label with thin gold border, pure gloss black background, dramatic key light from upper left casting long shadow, shallow depth of field, commercial product photography, 85mm prime lens, 8k',
-  cream: 'luxury wine bottle, dark bottle glass, cream ivory rectangular label with fine gold rule border, serif typography, black background, beauty dish studio lighting, product photography, 8k photorealistic',
-  noir: 'luxury wine bottle, very dark glass, dark black label with gold foil text, ornate border, deep black background, single spotlight from above, mysterious dramatic lighting, product photography, 8k',
-  blanc: 'luxury wine bottle, dark glass, clean white minimalist rectangular label, simple thin border, pure white label, matte black background, soft even studio lighting, editorial product photography, 8k',
+  hero: 'single luxury wine bottle, dark emerald green glass, elegant ivory rectangular label with thin bronze border, isolated on a pure white background, product cutout on plain white, high-key studio lighting, pure white seamless backdrop, no grey, faint soft shadow directly beneath bottle, commercial product photography, 85mm prime lens, 8k',
+  cream: 'a single one wine bottle, centered upright composition, only one bottle, dark green glass, cream ivory rectangular label with a fine bronze rule border, isolated on a pure white background, high-key studio lighting, pure white seamless backdrop, no grey, faint shadow beneath, product photography, 8k photorealistic',
+  noir: 'a single dark near-black wine bottle standing upright, one bottle only, matte black rectangular label with a thin gold rule border, centered on a plain soft warm neutral seamless studio background, generous empty negative space, minimalist calm composition, no props, no patterns, no ornate background, soft high-key studio lighting, gentle soft shadow beneath, commercial product photography, 85mm prime lens, 8k',
+  blanc: 'a single one wine bottle, centered upright composition, only one bottle, dark glass, clean pure white minimalist rectangular label with a thin border and a small red wax seal, isolated on a pure white background, high-key studio lighting, pure white seamless backdrop, no grey, faint shadow beneath, editorial product photography, 8k',
+  banner: 'a wine bottle and a pair of two wine glasses filled with red wine, both glasses side by side next to the bottle on a rustic wooden table outdoors, sunlit Tuscany countryside in the background with rolling hills, rows of vineyards and tall cypress trees, warm golden hour light, soft cinematic depth of field, Mediterranean summer atmosphere, luxurious lifestyle photography, 85mm lens, 8k',
 };
 
 async function serveBottleImage(key: string, env: Env): Promise<Response> {
-  const kvKey = `bottle:img:${key}:v1`;
+  const kvKey = `bottle:img:${key}:v5`;
   const cached = await env.CONTACTS.get(kvKey, 'arrayBuffer');
   if (cached) {
     return new Response(cached, {
@@ -17,7 +18,9 @@ async function serveBottleImage(key: string, env: Env): Promise<Response> {
     });
   }
   const prompt = PROMPTS[key] ?? PROMPTS.hero;
-  const stream = await env.AI.run('@cf/stabilityai/stable-diffusion-xl-base-1.0', { prompt });
+  const inputs: Record<string, unknown> = { prompt };
+  if (key === 'banner') { inputs.width = 1024; inputs.height = 640; }
+  const stream = await env.AI.run('@cf/stabilityai/stable-diffusion-xl-base-1.0', inputs as never);
   const buffer = await new Response(stream).arrayBuffer();
   await env.CONTACTS.put(kvKey, buffer, { expirationTtl: 604800 });
   return new Response(buffer, {
