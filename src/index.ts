@@ -68,6 +68,27 @@ export default {
       });
     }
 
+    // GET /robots.txt
+    if (method === 'GET' && pathname === '/robots.txt') {
+      const body = 'User-agent: *\nAllow: /\n\nSitemap: https://emptywine.com/sitemap.xml\n';
+      return new Response(body, {
+        headers: { 'content-type': 'text/plain;charset=UTF-8', 'cache-control': 'public, max-age=86400' },
+      });
+    }
+
+    // GET /sitemap.xml
+    if (method === 'GET' && pathname === '/sitemap.xml') {
+      const body = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://emptywine.com/</loc><changefreq>monthly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://emptywine.com/preview</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+</urlset>
+`;
+      return new Response(body, {
+        headers: { 'content-type': 'application/xml;charset=UTF-8', 'cache-control': 'public, max-age=86400' },
+      });
+    }
+
     // GET /assets/* → serve from R2
     if (method === 'GET' && pathname.startsWith('/assets/')) {
       const key = decodeURIComponent(pathname.slice('/assets/'.length));
