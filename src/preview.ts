@@ -495,6 +495,129 @@ input[type=range].slider::-moz-range-thumb {
 }
 .preview-note b { font-weight: 600; color: var(--bronze); }
 
+/* ── DOWNLOAD CHOOSER ── */
+.dl-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(26,22,16,0.42);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: dlFade 0.25s ease;
+}
+
+.dl-overlay[hidden] { display: none; }
+
+@keyframes dlFade { from { opacity: 0; } to { opacity: 1; } }
+
+.dl-card {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 30px 70px -20px rgba(42,39,35,0.4);
+  padding: 40px 40px 34px;
+  animation: dlRise 0.3s cubic-bezier(0.16,1,0.3,1);
+}
+
+@keyframes dlRise { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+.dl-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--faint);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color 0.2s;
+}
+.dl-close:hover { color: var(--ink); }
+
+.dl-kicker {
+  display: block;
+  font-weight: 700;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--bronze);
+  margin-bottom: 12px;
+}
+
+.dl-title {
+  font-weight: 300;
+  font-size: 1.7rem;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  margin-bottom: 12px;
+}
+
+.dl-note {
+  font-size: 0.9rem;
+  font-weight: 300;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 26px;
+}
+
+.dl-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.dl-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 20px 12px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+}
+
+.dl-btn:hover { border-color: var(--bronze); background: var(--bg-3); }
+.dl-btn:active { transform: scale(0.98); }
+.dl-btn:disabled { opacity: 0.55; cursor: default; }
+
+.dl-btn-fmt {
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+
+.dl-btn-sub {
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.dl-commission {
+  display: block;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.78rem;
+  color: var(--bronze);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.dl-commission:hover { color: var(--bronze-2); text-decoration: underline; }
+
 /* ── RESPONSIVE ── */
 @media (max-width: 980px) {
   #pv-nav { padding: 0 24px; }
@@ -641,10 +764,31 @@ input[type=range].slider::-moz-range-thumb {
     </div>
 
     <div class="editor-footer">
-      <a href="/#contact" class="btn-order">Commission This Label</a>
-      <p class="preview-note"><b>Updates live</b> as you type. Happy with it? Commission it and our designers refine it into the finished bottle.</p>
+      <button type="button" class="btn-order" id="btn-commission">Commission This Label</button>
+      <p class="preview-note"><b>Updates live</b> as you type. Download a print-ready file, or commission us to produce the finished bottle.</p>
     </div>
 
+  </div>
+</div>
+
+<!-- Download chooser -->
+<div class="dl-overlay" id="dl-overlay" hidden>
+  <div class="dl-card" role="dialog" aria-modal="true" aria-labelledby="dl-title">
+    <button type="button" class="dl-close" id="dl-close" aria-label="Close">×</button>
+    <span class="dl-kicker">Print-Ready Artwork</span>
+    <h2 class="dl-title" id="dl-title">Download your label</h2>
+    <p class="dl-note">High-resolution label artwork, ready for the printer. Choose a format:</p>
+    <div class="dl-actions">
+      <button type="button" class="dl-btn" id="dl-png">
+        <span class="dl-btn-fmt">PNG</span>
+        <span class="dl-btn-sub">300 DPI image</span>
+      </button>
+      <button type="button" class="dl-btn" id="dl-pdf">
+        <span class="dl-btn-fmt">PDF</span>
+        <span class="dl-btn-sub">print document</span>
+      </button>
+    </div>
+    <a href="/#contact" class="dl-commission">Prefer we print &amp; deliver it? Commission us →</a>
   </div>
 </div>
 
@@ -724,6 +868,227 @@ input[type=range].slider::-moz-range-thumb {
       else if (s === 'blanc') paper.classList.add('style-blanc');
     });
   });
+
+  // ── Print-ready export ─────────────────────────────────────────────
+  var PALETTES = {
+    cream: { bg: ['#faf6ec','#f2e8d5','#e6d8c2'], brand:'#18110a',
+      app:'rgba(60,40,10,0.5)', cls:'rgba(60,40,10,0.6)', var:'rgba(60,40,10,0.46)', vin:'rgba(80,55,14,0.62)',
+      rule:'rgba(130,90,18,0.5)', frameO:'rgba(150,110,25,0.42)', frameI:'rgba(150,110,25,0.16)' },
+    noir: { bg: ['#17140f','#241f18'], brand:'#d8b25f',
+      app:'rgba(216,178,95,0.7)', cls:'rgba(216,178,95,0.7)', var:'rgba(216,178,95,0.7)', vin:'rgba(216,178,95,0.7)',
+      rule:'rgba(216,178,95,0.4)', frameO:'rgba(216,178,95,0.35)', frameI:'rgba(216,178,95,0.15)' },
+    blanc: { bg: ['#faf9f7'], brand:'#1b1512',
+      app:'rgba(27,21,18,0.5)', cls:'rgba(27,21,18,0.5)', var:'rgba(27,21,18,0.5)', vin:'rgba(27,21,18,0.5)',
+      rule:'rgba(27,21,18,0.22)', frameO:'rgba(27,21,18,0.2)', frameI:'rgba(27,21,18,0.09)' }
+  };
+
+  function currentStyle() {
+    if (paper.classList.contains('style-noir')) return 'noir';
+    if (paper.classList.contains('style-blanc')) return 'blanc';
+    return 'cream';
+  }
+  function scaleOf(name) {
+    var v = parseFloat(getComputedStyle(root).getPropertyValue('--scale-' + name));
+    return isNaN(v) ? 1 : v;
+  }
+  function txt(id) { return (document.getElementById(id).textContent || '').trim(); }
+
+  function wrapLines(ctx, text, maxWidth) {
+    var words = text.split(/\\s+/);
+    var lines = [], line = '';
+    for (var i = 0; i < words.length; i++) {
+      var test = line ? line + ' ' + words[i] : words[i];
+      if (ctx.measureText(test).width > maxWidth && line) { lines.push(line); line = words[i]; }
+      else { line = test; }
+    }
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  async function renderLabelCanvas() {
+    // ensure webfonts are ready before drawing to canvas
+    try {
+      await Promise.all([
+        document.fonts.load('italic 500 100px "Cormorant Garamond"'),
+        document.fonts.load('italic 400 100px "Cormorant Garamond"'),
+        document.fonts.load('700 100px "Manrope"'),
+        document.fonts.load('600 100px "Manrope"')
+      ]);
+      await document.fonts.ready;
+    } catch (e) {}
+
+    var W = 1240, H = 1400;
+    var canvas = document.createElement('canvas');
+    canvas.width = W; canvas.height = H;
+    var ctx = canvas.getContext('2d');
+    var pal = PALETTES[currentStyle()];
+
+    // background
+    if (pal.bg.length === 1) {
+      ctx.fillStyle = pal.bg[0];
+    } else {
+      var g = ctx.createLinearGradient(0, 0, W * 0.35, H);
+      pal.bg.forEach(function(c, i) { g.addColorStop(pal.bg.length === 3 ? [0,0.45,1][i] : i, c); });
+      ctx.fillStyle = g;
+    }
+    ctx.fillRect(0, 0, W, H);
+
+    // frames
+    ctx.lineWidth = Math.max(1.5, H * 0.0016);
+    ctx.strokeStyle = pal.frameO;
+    ctx.strokeRect(0.07 * W, 0.07 * H, 0.86 * W, 0.86 * H);
+    ctx.strokeStyle = pal.frameI;
+    ctx.strokeRect(0.105 * W, 0.105 * H, 0.79 * W, 0.79 * H);
+
+    // content geometry (padding % is relative to width in CSS)
+    var padX = 0.09 * W, padY = 0.08 * W;
+    var contentX = padX, contentW = W - 2 * padX;
+    var contentY = padY, contentH = H - 2 * padY;
+    var cx = W / 2;
+
+    function fontStr(el) {
+      if (el.family === 'cg') return el.italic + ' ' + el.weight + ' ' + el.fs + 'px "Cormorant Garamond"';
+      return el.weight + ' ' + el.fs + 'px "Manrope"';
+    }
+
+    // build ordered elements
+    var els = [
+      { key:'app', text: txt('lbl-appellation').toUpperCase(), family:'m', weight:700, fs:0.056*H*scaleOf('appellation'), lh:1.1, ls:0.14, color:pal.app, mb:0.055*H },
+      { key:'brand', text: txt('lbl-brand'), family:'cg', italic:'italic', weight:500, fs:0.17*H*scaleOf('brand'), lh:1.0, ls:0, color:pal.brand, mb:0.04*H },
+      { key:'rule', rule:true, mb:0.04*H },
+      { key:'cls', text: txt('lbl-class').toUpperCase(), family:'m', weight:600, fs:0.052*H*scaleOf('class'), lh:1.1, ls:0.16, color:pal.cls, mb:0.035*H },
+      { key:'var', text: txt('lbl-varietal'), family:'cg', italic:'italic', weight:400, fs:0.085*H*scaleOf('varietal'), lh:1.05, ls:0, color:pal.var, mb:0.04*H },
+      { key:'vin', text: txt('lbl-vintage').toUpperCase(), family:'m', weight:600, fs:0.056*H*scaleOf('vintage'), lh:1.0, ls:0.22, color:pal.vin, mb:0 }
+    ];
+
+    // measure (wrap text, compute heights)
+    var total = 0;
+    els.forEach(function(el) {
+      if (el.rule) { el.h = Math.max(2, H * 0.003); }
+      else {
+        ctx.font = fontStr(el);
+        ctx.letterSpacing = (el.ls * el.fs) + 'px';
+        el.lines = wrapLines(ctx, el.text, contentW);
+        el.h = el.lines.length * el.fs * el.lh;
+      }
+      total += el.h + el.mb;
+    });
+
+    var y = contentY + Math.max(0, (contentH - total) / 2);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+
+    els.forEach(function(el) {
+      if (el.rule) {
+        var rw = contentW * 0.62;
+        var grad = ctx.createLinearGradient(cx - rw/2, 0, cx + rw/2, 0);
+        grad.addColorStop(0, 'rgba(0,0,0,0)');
+        grad.addColorStop(0.5, pal.rule);
+        grad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(cx - rw/2, y, rw, el.h);
+      } else {
+        ctx.font = fontStr(el);
+        ctx.letterSpacing = (el.ls * el.fs) + 'px';
+        ctx.fillStyle = el.color;
+        for (var i = 0; i < el.lines.length; i++) {
+          ctx.fillText(el.lines[i], cx, y + i * el.fs * el.lh);
+        }
+      }
+      y += el.h + el.mb;
+    });
+    ctx.letterSpacing = '0px';
+    return canvas;
+  }
+
+  function dataURLToBytes(u) {
+    var bin = atob(u.split(',')[1]);
+    var a = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i);
+    return a;
+  }
+
+  // Minimal single-image PDF (JPEG via DCTDecode), no external libraries
+  function buildPDF(jpeg, w, h) {
+    var pw = (w / 300 * 72).toFixed(2), ph = (h / 300 * 72).toFixed(2);
+    var enc = function(s) { var a = new Uint8Array(s.length); for (var i=0;i<s.length;i++) a[i] = s.charCodeAt(i) & 0xff; return a; };
+    var parts = [], offsets = [], pos = 0;
+    function push(x) { var b = (typeof x === 'string') ? enc(x) : x; parts.push(b); pos += b.length; }
+    function obj(n, body) { offsets[n] = pos; push(n + ' 0 obj\\n' + body + '\\nendobj\\n'); }
+
+    push('%PDF-1.4\\n%\\xFF\\xFF\\xFF\\xFF\\n');
+    obj(1, '<< /Type /Catalog /Pages 2 0 R >>');
+    obj(2, '<< /Type /Pages /Kids [3 0 R] /Count 1 >>');
+    obj(3, '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + pw + ' ' + ph + '] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>');
+    offsets[4] = pos;
+    push('4 0 obj\\n<< /Type /XObject /Subtype /Image /Width ' + w + ' /Height ' + h + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + jpeg.length + ' >>\\nstream\\n');
+    push(jpeg);
+    push('\\nendstream\\nendobj\\n');
+    var content = 'q ' + pw + ' 0 0 ' + ph + ' 0 0 cm /Im0 Do Q';
+    obj(5, '<< /Length ' + content.length + ' >>\\nstream\\n' + content + '\\nendstream');
+    var xrefPos = pos, n = 6;
+    var xref = 'xref\\n0 ' + n + '\\n0000000000 65535 f \\n';
+    for (var i = 1; i < n; i++) xref += ('0000000000' + offsets[i]).slice(-10) + ' 00000 n \\n';
+    push(xref);
+    push('trailer\\n<< /Size ' + n + ' /Root 1 0 R >>\\nstartxref\\n' + xrefPos + '\\n%%EOF');
+    var totalLen = 0; parts.forEach(function(p) { totalLen += p.length; });
+    var out = new Uint8Array(totalLen), o = 0;
+    parts.forEach(function(p) { out.set(p, o); o += p.length; });
+    return out;
+  }
+
+  function downloadBlob(blob, name) {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(function() { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1500);
+  }
+
+  function fileBase() {
+    var b = txt('lbl-brand') || 'emptywine';
+    var slug = b.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'label';
+    return slug + '-label';
+  }
+
+  var overlay = document.getElementById('dl-overlay');
+  var pngBtn = document.getElementById('dl-png');
+  var pdfBtn = document.getElementById('dl-pdf');
+
+  function openChooser() { overlay.hidden = false; }
+  function closeChooser() { overlay.hidden = true; }
+
+  document.getElementById('btn-commission').addEventListener('click', openChooser);
+  document.getElementById('dl-close').addEventListener('click', closeChooser);
+  overlay.addEventListener('click', function(e) { if (e.target === overlay) closeChooser(); });
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && !overlay.hidden) closeChooser(); });
+
+  async function exportLabel(fmt, btn) {
+    pngBtn.disabled = true; pdfBtn.disabled = true;
+    var sub = btn.querySelector('.dl-btn-sub');
+    var original = sub.textContent;
+    sub.textContent = 'rendering…';
+    try {
+      var canvas = await renderLabelCanvas();
+      var name = fileBase();
+      if (fmt === 'png') {
+        await new Promise(function(res) { canvas.toBlob(function(b) { downloadBlob(b, name + '.png'); res(); }, 'image/png'); });
+      } else {
+        var jpeg = dataURLToBytes(canvas.toDataURL('image/jpeg', 0.92));
+        downloadBlob(new Blob([buildPDF(jpeg, canvas.width, canvas.height)], { type: 'application/pdf' }), name + '.pdf');
+      }
+      closeChooser();
+    } catch (e) {
+      console.error('export failed', e);
+      sub.textContent = 'failed — retry';
+    }
+    if (sub.textContent === 'rendering…') sub.textContent = original;
+    else setTimeout(function() { sub.textContent = original; }, 2000);
+    pngBtn.disabled = false; pdfBtn.disabled = false;
+  }
+
+  pngBtn.addEventListener('click', function() { exportLabel('png', pngBtn); });
+  pdfBtn.addEventListener('click', function() { exportLabel('pdf', pdfBtn); });
 })();
 </script>
 </body>
