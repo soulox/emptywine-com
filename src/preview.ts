@@ -5,6 +5,19 @@ export const PREVIEW_PAGE = `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Design Your Label — emptywine</title>
 <meta name="description" content="Preview a bespoke wine label for your brand, live. Type your name, pick a style, and see it on the bottle." />
+<link rel="canonical" href="https://emptywine.com/preview" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="emptywine" />
+<meta property="og:url" content="https://emptywine.com/preview" />
+<meta property="og:title" content="Design Your Label — emptywine" />
+<meta property="og:description" content="Preview a bespoke wine label for your brand, live. Type your name, pick a style, and see it on the bottle." />
+<meta property="og:image" content="https://emptywine.com/og.jpg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Design Your Label — emptywine" />
+<meta name="twitter:description" content="Preview a bespoke wine label for your brand, live — type your name, pick a style, download it print-ready." />
+<meta name="twitter:image" content="https://emptywine.com/og.jpg" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet" />

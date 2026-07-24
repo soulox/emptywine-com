@@ -1,5 +1,16 @@
 import { LANDING_PAGE } from './landing';
 import { PREVIEW_PAGE } from './preview';
+import { OG_IMAGE_B64 } from './og';
+
+let ogImageBytes: Uint8Array | null = null;
+function getOgImage(): Uint8Array {
+  if (!ogImageBytes) {
+    const bin = atob(OG_IMAGE_B64);
+    ogImageBytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) ogImageBytes[i] = bin.charCodeAt(i);
+  }
+  return ogImageBytes;
+}
 
 const PROMPTS: Record<string, string> = {
   hero: 'single luxury wine bottle, dark emerald green glass, elegant ivory rectangular label with thin bronze border, isolated on a pure white background, product cutout on plain white, high-key studio lighting, pure white seamless backdrop, no grey, faint soft shadow directly beneath bottle, commercial product photography, 85mm prime lens, 8k',
@@ -37,6 +48,16 @@ export default {
     if (method === 'GET' && pathname === '/') {
       return new Response(LANDING_PAGE, {
         headers: { 'content-type': 'text/html;charset=UTF-8' },
+      });
+    }
+
+    // GET /og.jpg → social share image (Open Graph / Twitter card)
+    if (method === 'GET' && pathname === '/og.jpg') {
+      return new Response(getOgImage(), {
+        headers: {
+          'content-type': 'image/jpeg',
+          'cache-control': 'public, max-age=604800',
+        },
       });
     }
 

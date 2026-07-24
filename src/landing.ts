@@ -5,6 +5,20 @@ export const LANDING_PAGE = `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>emptywine — Bespoke Corporate Wine Gifts</title>
 <meta name="description" content="Custom AI-designed wine labels for corporate gifting. Your brand on every bottle. An unforgettable impression." />
+<link rel="canonical" href="https://emptywine.com/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="emptywine" />
+<meta property="og:url" content="https://emptywine.com/" />
+<meta property="og:title" content="emptywine — Bespoke Corporate Wine Gifts" />
+<meta property="og:description" content="We design a bespoke wine label around your brand — an original, made only for you — and deliver it, beautifully, to every desk and doorstep that matters." />
+<meta property="og:image" content="https://emptywine.com/og.jpg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="A wine bottle and two glasses of red wine on a table overlooking a sunlit Tuscan vineyard" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="emptywine — Bespoke Corporate Wine Gifts" />
+<meta name="twitter:description" content="A bespoke wine label around your brand, delivered beautifully to every desk and doorstep that matters." />
+<meta name="twitter:image" content="https://emptywine.com/og.jpg" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
