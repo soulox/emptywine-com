@@ -30,8 +30,12 @@ export const PREVIEW_PAGE = `<!DOCTYPE html>
   --lbl-width:  67%;
   --lbl-height: 25.5%;
 
-  /* multiplier for all label typography, driven by the Text Size slider */
-  --lbl-scale: 1;
+  /* per-field multipliers for label typography, driven by the size sliders */
+  --scale-appellation: 1;
+  --scale-brand:       1;
+  --scale-class:       1;
+  --scale-varietal:    1;
+  --scale-vintage:     1;
 }
 
 html { scroll-behavior: smooth; }
@@ -188,7 +192,7 @@ body {
 .lbl-appellation {
   font-family: 'Manrope', sans-serif;
   font-weight: 700;
-  font-size: calc(5.6cqh * var(--lbl-scale));
+  font-size: calc(5.6cqh * var(--scale-appellation));
   line-height: 1.1;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -200,7 +204,7 @@ body {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-style: italic;
   font-weight: 500;
-  font-size: calc(17cqh * var(--lbl-scale));
+  font-size: calc(17cqh * var(--scale-brand));
   line-height: 1;
   color: #18110a;
   margin-bottom: 4cqh;
@@ -218,7 +222,7 @@ body {
 .lbl-class {
   font-family: 'Manrope', sans-serif;
   font-weight: 600;
-  font-size: calc(5.2cqh * var(--lbl-scale));
+  font-size: calc(5.2cqh * var(--scale-class));
   line-height: 1.1;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -229,7 +233,7 @@ body {
 .lbl-varietal {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-style: italic;
-  font-size: calc(8.5cqh * var(--lbl-scale));
+  font-size: calc(8.5cqh * var(--scale-varietal));
   line-height: 1.05;
   color: rgba(60,40,10,0.46);
   margin-bottom: 4cqh;
@@ -238,7 +242,7 @@ body {
 .lbl-vintage {
   font-family: 'Manrope', sans-serif;
   font-weight: 600;
-  font-size: calc(5.6cqh * var(--lbl-scale));
+  font-size: calc(5.6cqh * var(--scale-vintage));
   line-height: 1;
   letter-spacing: 0.22em;
   color: rgba(80,55,14,0.62);
@@ -368,6 +372,27 @@ body {
   color: var(--bronze);
   font-variant-numeric: tabular-nums;
 }
+
+/* per-field text-size controls */
+.size-group { display: flex; flex-direction: column; gap: 14px; }
+
+.size-row {
+  display: grid;
+  grid-template-columns: 88px 1fr 40px;
+  align-items: center;
+  gap: 14px;
+}
+
+.size-row > span:first-child {
+  font-weight: 600;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.size-row .field-val { text-align: right; font-size: 0.68rem; }
+.size-row .slider { margin: 0; }
 
 input[type=range].slider {
   -webkit-appearance: none;
@@ -553,11 +578,34 @@ input[type=range].slider::-moz-range-thumb {
       </div>
 
       <div class="field">
-        <div class="field-row">
-          <label for="f-size">Text Size</label>
-          <span class="field-val" id="f-size-val">100%</span>
+        <label>Text Sizes</label>
+        <div class="size-group" id="size-group">
+          <div class="size-row">
+            <span>Brand</span>
+            <input class="slider" type="range" min="55" max="150" value="100" data-target="brand" aria-label="Brand text size" />
+            <span class="field-val" data-val="brand">100%</span>
+          </div>
+          <div class="size-row">
+            <span>Collection</span>
+            <input class="slider" type="range" min="55" max="150" value="100" data-target="appellation" aria-label="Collection text size" />
+            <span class="field-val" data-val="appellation">100%</span>
+          </div>
+          <div class="size-row">
+            <span>Réserve</span>
+            <input class="slider" type="range" min="55" max="150" value="100" data-target="class" aria-label="Classification text size" />
+            <span class="field-val" data-val="class">100%</span>
+          </div>
+          <div class="size-row">
+            <span>Varietal</span>
+            <input class="slider" type="range" min="55" max="150" value="100" data-target="varietal" aria-label="Varietal text size" />
+            <span class="field-val" data-val="varietal">100%</span>
+          </div>
+          <div class="size-row">
+            <span>Vintage</span>
+            <input class="slider" type="range" min="55" max="150" value="100" data-target="vintage" aria-label="Vintage text size" />
+            <span class="field-val" data-val="vintage">100%</span>
+          </div>
         </div>
-        <input class="slider" id="f-size" type="range" min="75" max="130" value="100" step="1" aria-label="Label text size" />
       </div>
     </div>
 
@@ -601,12 +649,16 @@ input[type=range].slider::-moz-range-thumb {
     document.getElementById(id).addEventListener('input', updateLabel);
   });
 
-  var sizeSlider = document.getElementById('f-size');
-  var sizeVal = document.getElementById('f-size-val');
-  sizeSlider.addEventListener('input', function() {
-    var pct = parseInt(sizeSlider.value, 10);
-    document.documentElement.style.setProperty('--lbl-scale', (pct / 100).toString());
-    sizeVal.textContent = pct + '%';
+  // Per-field text-size sliders — each drives its own --scale-{target} var
+  var root = document.documentElement;
+  document.querySelectorAll('#size-group .slider').forEach(function(slider) {
+    var target = slider.getAttribute('data-target');
+    var valEl = document.querySelector('#size-group .field-val[data-val="' + target + '"]');
+    slider.addEventListener('input', function() {
+      var pct = parseInt(slider.value, 10);
+      root.style.setProperty('--scale-' + target, (pct / 100).toString());
+      if (valEl) valEl.textContent = pct + '%';
+    });
   });
 
   var paper = document.getElementById('label-paper');
