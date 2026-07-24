@@ -29,6 +29,9 @@ export const PREVIEW_PAGE = `<!DOCTYPE html>
   --lbl-left:   16.5%;
   --lbl-width:  67%;
   --lbl-height: 25.5%;
+
+  /* multiplier for all label typography, driven by the Text Size slider */
+  --lbl-scale: 1;
 }
 
 html { scroll-behavior: smooth; }
@@ -185,7 +188,7 @@ body {
 .lbl-appellation {
   font-family: 'Manrope', sans-serif;
   font-weight: 700;
-  font-size: 5.6cqh;
+  font-size: calc(5.6cqh * var(--lbl-scale));
   line-height: 1.1;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -197,7 +200,7 @@ body {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-style: italic;
   font-weight: 500;
-  font-size: 17cqh;
+  font-size: calc(17cqh * var(--lbl-scale));
   line-height: 1;
   color: #18110a;
   margin-bottom: 4cqh;
@@ -215,7 +218,7 @@ body {
 .lbl-class {
   font-family: 'Manrope', sans-serif;
   font-weight: 600;
-  font-size: 5.2cqh;
+  font-size: calc(5.2cqh * var(--lbl-scale));
   line-height: 1.1;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -226,7 +229,7 @@ body {
 .lbl-varietal {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-style: italic;
-  font-size: 8.5cqh;
+  font-size: calc(8.5cqh * var(--lbl-scale));
   line-height: 1.05;
   color: rgba(60,40,10,0.46);
   margin-bottom: 4cqh;
@@ -235,7 +238,7 @@ body {
 .lbl-vintage {
   font-family: 'Manrope', sans-serif;
   font-weight: 600;
-  font-size: 5.6cqh;
+  font-size: calc(5.6cqh * var(--lbl-scale));
   line-height: 1;
   letter-spacing: 0.22em;
   color: rgba(80,55,14,0.62);
@@ -349,6 +352,59 @@ body {
 
 .style-chip:hover { border-color: var(--bronze-2); color: var(--ink); }
 .style-chip.active { border-color: var(--bronze); color: var(--bronze); background: var(--bg-2); }
+
+/* text-size slider */
+.field-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.field-val {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 600;
+  font-size: 0.72rem;
+  color: var(--bronze);
+  font-variant-numeric: tabular-nums;
+}
+
+input[type=range].slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 2px;
+  background: var(--border);
+  outline: none;
+  cursor: pointer;
+  margin: 6px 0;
+}
+
+input[type=range].slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--bronze);
+  border: 2px solid var(--bg);
+  box-shadow: 0 1px 4px rgba(42,39,35,0.2);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+input[type=range].slider::-webkit-slider-thumb:hover { transform: scale(1.15); }
+input[type=range].slider:active::-webkit-slider-thumb { transform: scale(1.05); }
+
+input[type=range].slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--bronze);
+  border: 2px solid var(--bg);
+  box-shadow: 0 1px 4px rgba(42,39,35,0.2);
+  cursor: pointer;
+}
 
 .editor-footer {
   padding: 26px 40px 32px;
@@ -495,6 +551,14 @@ body {
           <span class="style-chip" data-style="blanc">Blanc Épuré</span>
         </div>
       </div>
+
+      <div class="field">
+        <div class="field-row">
+          <label for="f-size">Text Size</label>
+          <span class="field-val" id="f-size-val">100%</span>
+        </div>
+        <input class="slider" id="f-size" type="range" min="75" max="130" value="100" step="1" aria-label="Label text size" />
+      </div>
     </div>
 
     <div class="editor-footer">
@@ -535,6 +599,14 @@ body {
 
   ['f-brand','f-collection','f-varietal','f-vintage'].forEach(function(id) {
     document.getElementById(id).addEventListener('input', updateLabel);
+  });
+
+  var sizeSlider = document.getElementById('f-size');
+  var sizeVal = document.getElementById('f-size-val');
+  sizeSlider.addEventListener('input', function() {
+    var pct = parseInt(sizeSlider.value, 10);
+    document.documentElement.style.setProperty('--lbl-scale', (pct / 100).toString());
+    sizeVal.textContent = pct + '%';
   });
 
   var paper = document.getElementById('label-paper');
