@@ -357,6 +357,31 @@ body {
 .style-chip:hover { border-color: var(--bronze-2); color: var(--ink); }
 .style-chip.active { border-color: var(--bronze); color: var(--bronze); background: var(--bg-2); }
 
+/* segmented toggle (e.g. vintage numeral format) */
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.seg-btn {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+}
+
+.seg-btn + .seg-btn { border-left: 1px solid var(--border); }
+.seg-btn:hover { color: var(--ink); }
+.seg-btn.active { color: var(--bronze); background: var(--bg-2); }
+
 /* text-size slider */
 .field-row {
   display: flex;
@@ -565,7 +590,13 @@ input[type=range].slider::-moz-range-thumb {
         <input id="f-varietal" type="text" placeholder="Burgundy · Pinot Noir" />
       </div>
       <div class="field">
-        <label for="f-vintage">Vintage Year</label>
+        <div class="field-row">
+          <label for="f-vintage">Vintage Year</label>
+          <div class="seg" id="vintage-format" role="group" aria-label="Vintage numeral format">
+            <button type="button" class="seg-btn active" data-fmt="roman">MMXXV</button>
+            <button type="button" class="seg-btn" data-fmt="arabic">2025</button>
+          </div>
+        </div>
         <input id="f-vintage" type="text" placeholder="2025" maxlength="4" />
       </div>
       <div class="field">
@@ -634,19 +665,40 @@ input[type=range].slider::-moz-range-thumb {
     return out;
   }
 
+  var vintageFmt = 'roman';
+
+  function renderVintage() {
+    var vintage = document.getElementById('f-vintage').value.trim();
+    var display;
+    if (!vintage) {
+      display = vintageFmt === 'roman' ? 'MMXXV' : '2025';
+    } else {
+      display = vintageFmt === 'roman' ? toRoman(vintage) : vintage;
+    }
+    document.getElementById('lbl-vintage').textContent = display;
+  }
+
   function updateLabel() {
     var brand    = document.getElementById('f-brand').value.trim();
     var collect  = document.getElementById('f-collection').value.trim();
     var varietal = document.getElementById('f-varietal').value.trim();
-    var vintage  = document.getElementById('f-vintage').value.trim();
     document.getElementById('lbl-brand').textContent       = brand || 'emptywine';
     document.getElementById('lbl-appellation').textContent = collect || 'Appellation Contrôlée';
     document.getElementById('lbl-varietal').textContent    = varietal || 'Burgundy · Pinot Noir';
-    document.getElementById('lbl-vintage').textContent     = toRoman(vintage) || 'MMXXV';
+    renderVintage();
   }
 
   ['f-brand','f-collection','f-varietal','f-vintage'].forEach(function(id) {
     document.getElementById(id).addEventListener('input', updateLabel);
+  });
+
+  document.querySelectorAll('#vintage-format .seg-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('#vintage-format .seg-btn').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      vintageFmt = btn.getAttribute('data-fmt');
+      renderVintage();
+    });
   });
 
   // Per-field text-size sliders — each drives its own --scale-{target} var
