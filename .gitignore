@@ -200,3 +200,8 @@ dist
 
 # Claude Code local settings (personal, not shared)
 .claude/settings.local.json
+
+# Installed agent-skills library (npx skills add) — kept local, not tracked
+.agents/
+.claude/skills/
+skills-lock.json
