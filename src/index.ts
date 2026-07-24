@@ -130,24 +130,67 @@ export default {
       return new Response(image, { headers: { 'content-type': 'image/png' } });
     }
 
-    // POST /api/contact → store in KV
+    // POST /api/contact → store in KV (with spam protection)
     if (method === 'POST' && pathname === '/api/contact') {
-      const body = await request.json() as {
-        name?: string; company?: string; email?: string; phone?: string; message?: string;
+      const json = (data: unknown, status = 200) =>
+        new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json' } });
+      // A silent "success" for spam: don't tip off bots, don't store.
+      const decoy = () => json({ success: true });
+
+      // Reject oversized payloads outright.
+      const len = Number(request.headers.get('content-length') || '0');
+      if (len > 20000) return json({ error: 'too_large' }, 413);
+
+      // Per-IP rate limit: max 5 submissions/hour (best-effort via KV).
+      const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+      const rlKey = `rl:contact:${ip}`;
+      const count = parseInt((await env.CONTACTS.get(rlKey)) || '0', 10);
+      if (count >= 5) return json({ error: 'rate_limited' }, 429);
+      await env.CONTACTS.put(rlKey, String(count + 1), { expirationTtl: 3600 });
+
+      let body: {
+        name?: string; company?: string; email?: string; phone?: string;
+        message?: string; website?: string; elapsed?: unknown;
       };
+      try {
+        body = await request.json();
+      } catch {
+        return json({ error: 'invalid JSON' }, 400);
+      }
+
+      // Honeypot: real users never fill the hidden "website" field.
+      if (typeof body.website === 'string' && body.website.trim() !== '') return decoy();
+
+      // Timing: humans take a few seconds; near-instant submits are bots.
+      const elapsed = Number(body.elapsed);
+      if (!Number.isFinite(elapsed) || elapsed < 2500) return decoy();
+
+      // Validation.
+      const name = String(body.name ?? '').trim();
+      const company = String(body.company ?? '').trim();
+      const email = String(body.email ?? '').trim();
+      const phone = String(body.phone ?? '').trim();
+      const message = String(body.message ?? '').trim();
+      const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (
+        !name || name.length > 120 ||
+        !company || company.length > 120 ||
+        !emailRe.test(email) || email.length > 254 ||
+        phone.length > 40 || message.length > 5000
+      ) {
+        return json({ error: 'invalid' }, 400);
+      }
+
+      // Link-spam heuristic: legitimate inquiries rarely contain many URLs.
+      if ((message.match(/https?:\/\//gi) || []).length > 3) return decoy();
+
       const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       await env.CONTACTS.put(`contact:${id}`, JSON.stringify({
-        id,
-        name: body.name ?? '',
-        company: body.company ?? '',
-        email: body.email ?? '',
-        phone: body.phone ?? '',
-        message: body.message ?? '',
+        id, name, company, email, phone, message,
+        ip,
         receivedAt: new Date().toISOString(),
       }));
-      return new Response(JSON.stringify({ success: true }), {
-        headers: { 'content-type': 'application/json' },
-      });
+      return json({ success: true });
     }
 
     return new Response('Not Found', { status: 404 });

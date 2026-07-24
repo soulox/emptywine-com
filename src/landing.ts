@@ -923,6 +923,16 @@ body::after {
 .field.error .field-error { display: block; }
 .field.error .field-hint { display: none; }
 
+/* honeypot: present in the DOM for bots, off-screen for humans (not display:none) */
+.hp-field {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
 #contact-error {
   display: none;
   font-family: 'Manrope', system-ui, -apple-system, sans-serif;
@@ -1303,6 +1313,10 @@ footer {
             <textarea id="cf-message" name="message" placeholder="e.g. 200 bottles for our annual client dinner in November. Dark label, company logo, Bordeaux preferred."></textarea>
             <span class="field-hint">The more you tell us, the closer the first sample lands.</span>
           </div>
+          <div class="hp-field" aria-hidden="true">
+            <label for="cf-website">Leave this field blank</label>
+            <input id="cf-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+          </div>
           <button type="submit">Send Inquiry</button>
         </form>
         <div id="contact-success">
@@ -1373,6 +1387,7 @@ footer {
   if (form) {
     var formError = document.getElementById('contact-error');
     var emailRe = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+    var formReadyAt = Date.now();
 
     function setFieldError(input, hasError) {
       var field = input.closest('.field');
@@ -1407,6 +1422,7 @@ footer {
       btn.disabled = true;
       var data = {};
       new FormData(form).forEach(function(val, key) { data[key] = val; });
+      data.elapsed = Date.now() - formReadyAt;
       fetch('/api/contact', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
