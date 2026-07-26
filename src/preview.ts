@@ -38,10 +38,10 @@ export const PREVIEW_PAGE = `<!DOCTYPE html>
   --border:   rgba(42,39,35,0.12);
 
   /* label position on the SVG bottle (calibrated to the vector below) */
-  --lbl-top:    44%;
-  --lbl-left:   23.5%;
-  --lbl-width:  53%;
-  --lbl-height: 20.5%;
+  --lbl-top:    41%;
+  --lbl-left:   17%;
+  --lbl-width:  66%;
+  --lbl-height: 25.5%;
 
   /* per-field multipliers for label typography, driven by the size sliders */
   --scale-appellation: 1;
