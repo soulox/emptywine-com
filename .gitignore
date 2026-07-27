@@ -205,3 +205,6 @@ dist
 .agents/
 .claude/skills/
 skills-lock.json
+
+# subagent-driven-development scratch (ledger, briefs, diffs)
+.superpowers/
