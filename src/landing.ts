@@ -61,6 +61,18 @@ body {
   overflow-x: hidden;
 }
 
+/* visible keyboard focus indicator (does not affect mouse users) */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+/* over the dark hero banner, use a light ring for contrast */
+#hero a:focus-visible { outline-color: #fdfaf3; }
+
 body::after {
   content: '';
   position: fixed;
@@ -1076,6 +1088,18 @@ footer {
   }
   .hero-meta { gap: 0; }
 }
+
+/* respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .marquee-track { animation: none; }
+  .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -1319,7 +1343,7 @@ footer {
           </div>
           <button type="submit">Send Inquiry</button>
         </form>
-        <div id="contact-success">
+        <div id="contact-success" role="status" aria-live="polite">
           <p>Thank you — we will be in touch within 24 hours.</p>
         </div>
       </div>

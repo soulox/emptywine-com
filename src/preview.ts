@@ -62,6 +62,15 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* visible keyboard focus indicator */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--bronze);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
 /* ── NAV ── */
 #pv-nav {
   display: flex;
@@ -377,11 +386,13 @@ body {
 .style-chips { display: flex; gap: 10px; flex-wrap: wrap; }
 
 .style-chip {
+  font-family: 'Manrope', sans-serif;
   font-weight: 700;
   font-size: 0.58rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   padding: 9px 16px;
+  background: transparent;
   border: 1px solid var(--border);
   border-radius: 2px;
   color: var(--muted);
@@ -663,6 +674,16 @@ input[type=range].slider::-moz-range-thumb {
   .bottle-svg { height: min(58vh, 460px); }
   .editor-header, .editor-body, .editor-footer { padding-left: 24px; padding-right: 24px; }
 }
+
+/* respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -738,9 +759,9 @@ input[type=range].slider::-moz-range-thumb {
       <div class="field">
         <label>Label Style</label>
         <div class="style-chips" id="style-chips">
-          <span class="style-chip active" data-style="cream">Cream Classic</span>
-          <span class="style-chip" data-style="noir">Noir Prestige</span>
-          <span class="style-chip" data-style="blanc">Blanc Épuré</span>
+          <button type="button" class="style-chip active" data-style="cream" aria-pressed="true">Cream Classic</button>
+          <button type="button" class="style-chip" data-style="noir" aria-pressed="false">Noir Prestige</button>
+          <button type="button" class="style-chip" data-style="blanc" aria-pressed="false">Blanc Épuré</button>
         </div>
       </div>
 
@@ -873,8 +894,12 @@ input[type=range].slider::-moz-range-thumb {
   var paper = document.getElementById('label-paper');
   document.querySelectorAll('.style-chip').forEach(function(chip) {
     chip.addEventListener('click', function() {
-      document.querySelectorAll('.style-chip').forEach(function(c) { c.classList.remove('active'); });
+      document.querySelectorAll('.style-chip').forEach(function(c) {
+        c.classList.remove('active');
+        c.setAttribute('aria-pressed', 'false');
+      });
       chip.classList.add('active');
+      chip.setAttribute('aria-pressed', 'true');
       paper.classList.remove('style-noir', 'style-blanc');
       var s = chip.getAttribute('data-style');
       if (s === 'noir') paper.classList.add('style-noir');
