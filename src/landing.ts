@@ -823,6 +823,68 @@ body::after {
   line-height: 1.7;
 }
 
+/* ── LABEL BUILDER CTA ── */
+#builder-cta {
+  padding: 120px 0;
+  border-top: 1px solid var(--border);
+}
+
+.builder-cta-inner {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 72px;
+  align-items: center;
+}
+
+.builder-cta-copy .section-sub { margin: 18px 0 36px; }
+
+/* a stylized label "chip" that hints at the live builder */
+.builder-cta-visual {
+  justify-self: center;
+  width: 260px;
+  height: 340px;
+  background: linear-gradient(168deg, #faf6ec 0%, #f2e8d5 45%, #e6d8c2 100%);
+  border-radius: 4px;
+  box-shadow: 0 26px 54px -22px rgba(58,44,26,0.34), 0 6px 16px -8px rgba(58,44,26,0.16);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 30px;
+  text-decoration: none;
+  position: relative;
+  transition: transform 0.5s cubic-bezier(0.23,1,0.32,1), box-shadow 0.5s ease;
+}
+
+.builder-cta-visual::before {
+  content: '';
+  position: absolute;
+  inset: 14px;
+  border: 1px solid rgba(150,110,25,0.4);
+  pointer-events: none;
+}
+
+.builder-cta-visual:hover {
+  transform: translateY(-8px) rotate(-1.5deg);
+  box-shadow: 0 34px 64px -22px rgba(58,44,26,0.4), 0 10px 20px -8px rgba(58,44,26,0.18);
+}
+
+.bcv-line { font-family: 'Manrope', sans-serif; text-transform: uppercase; letter-spacing: 0.2em; color: rgba(60,40,10,0.6); }
+.bcv-appellation { font-size: 0.5rem; font-weight: 700; margin-bottom: 18px; }
+.bcv-brand {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: 2rem;
+  color: #18110a;
+  margin-bottom: 14px;
+  transition: color 0.3s ease;
+}
+.builder-cta-visual:hover .bcv-brand { color: var(--gold-3); }
+.bcv-rule { width: 60%; height: 1px; background: linear-gradient(to right, transparent, rgba(130,90,18,0.5), transparent); margin-bottom: 14px; }
+.bcv-class { font-size: 0.5rem; font-weight: 600; margin-bottom: 12px; }
+.bcv-year { font-size: 0.56rem; font-weight: 600; letter-spacing: 0.3em; color: rgba(90,62,14,0.7); }
+
 /* ── CONTACT ── */
 #contact { padding: 120px 0; }
 
@@ -1070,12 +1132,14 @@ footer {
   .g-label-wrap:nth-child(3) .g-label-card { height: 360px; }
 
   .ethos-inner { grid-template-columns: 1fr; gap: 40px; }
+  .builder-cta-inner { grid-template-columns: 1fr; gap: 44px; }
+  .builder-cta-visual { order: -1; }
   .ethos-quote { margin-bottom: 0; }
 
   .contact-layout { grid-template-columns: 1fr; gap: 56px; }
   .field-group { grid-template-columns: 1fr; }
   footer { padding: 32px 24px; flex-direction: column; text-align: center; }
-  #how, #gallery, #ethos, #contact { padding: 84px 0; }
+  #how, #gallery, #ethos, #contact, #builder-cta { padding: 84px 0; }
 }
 
 @media (max-width: 560px) {
@@ -1119,6 +1183,7 @@ footer {
   <ul class="nav-links">
     <li><a href="#how">Process</a></li>
     <li><a href="#gallery">Labels</a></li>
+    <li><a href="/preview">Label Builder</a></li>
     <li><a href="#ethos">Why Us</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
@@ -1136,7 +1201,7 @@ footer {
       <p class="hero-sub">Give a bottle no one else can give. We design a wine label around your brand — an original, made only for you — and deliver it, beautifully, to every desk and doorstep that matters.</p>
       <div class="hero-actions">
         <a href="#contact" class="btn-primary">Commission a Label</a>
-        <a href="#gallery" class="btn-ghost">See the Labels</a>
+        <a href="/preview" class="btn-ghost">Try the label builder →</a>
       </div>
       <div class="hero-meta">
         <div class="hero-meta-item"><b>Origin</b>Bordeaux &amp; Burgundy estates</div>
@@ -1256,6 +1321,27 @@ footer {
         <p class="g-label-desc">Pure white, precise type, a single wax seal — modern and refined.</p>
       </div>
 
+    </div>
+  </div>
+</section>
+
+<!-- LABEL BUILDER CTA -->
+<section id="builder-cta">
+  <div class="section-wrap">
+    <div class="builder-cta-inner reveal">
+      <div class="builder-cta-copy">
+        <span class="section-kicker">Live Preview</span>
+        <h2 class="section-title">see it <em>before</em><br>you commission</h2>
+        <p class="section-sub">Type your company name, pick a style, and watch your label appear on the bottle — in seconds. Download it print-ready, or send it straight to us.</p>
+        <a href="/preview" class="btn-primary">Open the Label Builder →</a>
+      </div>
+      <a href="/preview" class="builder-cta-visual" aria-label="Open the label builder">
+        <span class="bcv-line bcv-appellation">Appellation Contrôlée</span>
+        <span class="bcv-brand">your brand</span>
+        <span class="bcv-rule"></span>
+        <span class="bcv-line bcv-class">Grand Réserve</span>
+        <span class="bcv-line bcv-year">MMXXV</span>
+      </a>
     </div>
   </div>
 </section>
