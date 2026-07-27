@@ -279,6 +279,29 @@ const fr: Copy = {
   landingDesc: 'Des étiquettes de vin sur mesure conçues par IA pour vos cadeaux d’entreprise. Votre marque sur chaque bouteille. Une impression inoubliable.',
   landingOgTitle: 'emptywine — Cadeaux d’entreprise en vin sur mesure',
   landingOgDesc: 'Une étiquette de vin sur mesure à l’image de votre marque, livrée avec élégance sur chaque bureau et à chaque porte qui compte.',
+  // preview / design builder
+  pvBack: '← Retour au site',
+  pvKicker: 'Aperçu en direct',
+  pvTitleHtml: 'concevez<br>votre <em>étiquette</em>',
+  pvBrand: 'Marque / nom de l’entreprise', pvBrandPh: 'Larkfield &amp; Voss',
+  pvCollection: 'Nom de la cuvée', pvCollectionPh: 'The Heritage Reserve',
+  pvVarietal: 'Vin / cépage', pvVarietalPh: 'Bourgogne · Pinot Noir',
+  pvVintage: 'Millésime', pvVintagePh: '2025',
+  pvStyle: 'Style d’étiquette', pvStyleCream: 'Ivoire classique', pvStyleNoir: 'Noir prestige', pvStyleBlanc: 'Blanc épuré',
+  pvTextSizes: 'Tailles de texte', pvSizeBrand: 'Marque', pvSizeCollection: 'Cuvée', pvSizeClass: 'Réserve',
+  pvSizeVarietal: 'Cépage', pvSizeVintage: 'Millésime',
+  pvCommission: 'Commander cette étiquette',
+  pvNoteHtml: '<b>Mise à jour en direct</b> pendant que vous tapez. Téléchargez un fichier prêt à imprimer, ou confiez-nous la production de la bouteille finale.',
+  // download modal
+  dlKicker: 'Fichier prêt à imprimer', dlTitle: 'Téléchargez votre étiquette',
+  dlNote: 'Visuel d’étiquette haute résolution, prêt pour l’impression. Choisissez un format :',
+  dlPngSub: 'image 300 DPI', dlPdfSub: 'document d’impression',
+  dlCommission: 'Vous préférez qu’on l’imprime et la livre ? Commandez →', dlRendering: 'rendu…',
+  // <head> design
+  designTitle: 'Concevez votre étiquette — emptywine',
+  designDesc: 'Prévisualisez une étiquette de vin sur mesure pour votre marque, en direct. Saisissez votre nom, choisissez un style et voyez-la sur la bouteille.',
+  designOgTitle: 'Concevez votre étiquette — emptywine',
+  designOgDesc: 'Prévisualisez une étiquette de vin sur mesure pour votre marque, en direct — saisissez votre nom, choisissez un style, téléchargez-la prête à imprimer.',
 };
 
 export const COPY: Record<Lang, Copy> = {
