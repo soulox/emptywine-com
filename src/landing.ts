@@ -3,6 +3,7 @@ import { COPY, Lang, headTags, otherLang } from './i18n';
 export function renderLanding(lang: Lang): string {
   const t = COPY[lang];
   const alt = lang === 'en' ? '/fr' : '/';
+  const designPath = lang === 'en' ? '/design' : '/fr/design';
   const marqueeHtml = t.marquee.concat(t.marquee).map(function(m) {
     return '    <span class="marquee-item"><strong>' + m + '</strong></span><span class="marquee-dot"></span>';
   }).join('\n');
@@ -1217,7 +1218,7 @@ footer {
   <ul class="nav-links">
     <li><a href="#how">${t.navProcess}</a></li>
     <li><a href="#gallery">${t.navLabels}</a></li>
-    <li><a href="/preview">${t.navDesign}</a></li>
+    <li><a href="${designPath}">${t.navDesign}</a></li>
     <li><a href="#ethos">${t.navWhyUs}</a></li>
     <li><a href="#contact">${t.navContact}</a></li>
   </ul>
@@ -1241,7 +1242,7 @@ footer {
       <p class="hero-sub">${t.heroSub}</p>
       <div class="hero-actions">
         <a href="#contact" class="btn-primary">${t.heroCtaCommission}</a>
-        <a href="/preview" class="btn-ghost">${t.heroCtaBuilder}</a>
+        <a href="${designPath}" class="btn-ghost">${t.heroCtaBuilder}</a>
       </div>
       <div class="hero-meta">
         <div class="hero-meta-item"><b>${t.heroMetaOriginLabel}</b>${t.heroMetaOriginValue}</div>
@@ -1379,9 +1380,9 @@ ${marqueeHtml}
         <span class="section-kicker">${t.bcKicker}</span>
         <h2 class="section-title">${t.bcTitleHtml}</h2>
         <p class="section-sub">${t.bcSub}</p>
-        <a href="/preview" class="btn-primary">${t.bcCta}</a>
+        <a href="${designPath}" class="btn-primary">${t.bcCta}</a>
       </div>
-      <a href="/preview" class="builder-cta-visual" aria-label="Open the label builder">
+      <a href="${designPath}" class="builder-cta-visual" aria-label="Open the label builder">
         <span class="bcv-line bcv-appellation">Appellation Contrôlée</span>
         <span class="bcv-brand">your brand</span>
         <span class="bcv-rule"></span>

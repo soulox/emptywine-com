@@ -1,5 +1,5 @@
 import { renderLanding } from './landing';
-import { PREVIEW_PAGE } from './preview';
+import { renderPreview } from './preview';
 import { OG_IMAGE_B64 } from './og';
 
 let ogImageBytes: Uint8Array | null = null;
@@ -95,9 +95,14 @@ export default {
       });
     }
 
-    // GET /preview → label preview builder
-    if (method === 'GET' && pathname === '/preview') {
-      return new Response(PREVIEW_PAGE, {
+    // GET /design → label builder (English); /fr/design → French
+    if (method === 'GET' && pathname === '/design') {
+      return new Response(renderPreview('en'), {
+        headers: { 'content-type': 'text/html;charset=UTF-8' },
+      });
+    }
+    if (method === 'GET' && pathname === '/fr/design') {
+      return new Response(renderPreview('fr'), {
         headers: { 'content-type': 'text/html;charset=UTF-8' },
       });
     }

@@ -1,23 +1,14 @@
-export const PREVIEW_PAGE = `<!DOCTYPE html>
-<html lang="en">
+import { COPY, Lang, headTags, otherLang } from './i18n';
+
+export function renderPreview(lang: Lang): string {
+  const t = COPY[lang];
+  const alt = lang === 'en' ? '/fr/design' : '/design';
+  return `<!DOCTYPE html>
+<html lang="${lang}">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Design Your Label — emptywine</title>
-<meta name="description" content="Preview a bespoke wine label for your brand, live. Type your name, pick a style, and see it on the bottle." />
-<link rel="canonical" href="https://emptywine.com/preview" />
-<meta property="og:type" content="website" />
-<meta property="og:site_name" content="emptywine" />
-<meta property="og:url" content="https://emptywine.com/preview" />
-<meta property="og:title" content="Design Your Label — emptywine" />
-<meta property="og:description" content="Preview a bespoke wine label for your brand, live. Type your name, pick a style, and see it on the bottle." />
-<meta property="og:image" content="https://emptywine.com/og.jpg" />
-<meta property="og:image:width" content="1200" />
-<meta property="og:image:height" content="630" />
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Design Your Label — emptywine" />
-<meta name="twitter:description" content="Preview a bespoke wine label for your brand, live — type your name, pick a style, download it print-ready." />
-<meta name="twitter:image" content="https://emptywine.com/og.jpg" />
+${headTags({ lang, path: '/design', title: t.designTitle, description: t.designDesc, ogTitle: t.designOgTitle, ogDescription: t.designOgDesc })}
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet" />
@@ -111,6 +102,12 @@ input:focus-visible {
   transition: color 0.2s;
 }
 .nav-back:hover { color: var(--bronze); }
+
+.nav-right { display: inline-flex; align-items: center; gap: 22px; }
+.lang-toggle { display: inline-flex; align-items: center; gap: 7px; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; }
+.lang-toggle .lang-current { color: var(--bronze); }
+.lang-toggle a { color: var(--muted); text-decoration: none; transition: color 0.2s; }
+.lang-toggle a:hover { color: var(--bronze); }
 
 /* ── LAYOUT ── */
 .preview-layout {
@@ -689,7 +686,7 @@ input[type=range].slider::-moz-range-thumb {
 <body>
 
 <nav id="pv-nav">
-  <a href="/" class="nav-logo" aria-label="emptywine — home">
+  <a href="${lang === 'en' ? '/' : '/fr'}" class="nav-logo" aria-label="emptywine — home">
     <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
       <circle cx="20" cy="20" r="18" fill="#8a6a3c"/>
       <path fill="#fbfaf7" d="M18.4 8h3.2v4.2q0 1.1 .75 1.95l.7 .8q1.45 1.6 1.45 3.9V29.4q0 1.5-1.5 1.5h-6.4q-1.5 0-1.5-1.5V20.85q0-2.3 1.45-3.9l.7-.8Q18.4 13.3 18.4 12.2z"/>
@@ -697,7 +694,13 @@ input[type=range].slider::-moz-range-thumb {
     </svg>
     <span class="brand-word">emptywine</span>
   </a>
-  <a href="/" class="nav-back">← Back to site</a>
+  <div class="nav-right">
+    <div class="lang-toggle" aria-label="Language">
+      <span class="lang-current">${lang === 'en' ? 'EN' : 'FR'}</span>
+      <a href="${alt}" hreflang="${otherLang(lang)}">${lang === 'en' ? 'FR' : 'EN'}</a>
+    </div>
+    <a href="${lang === 'en' ? '/' : '/fr'}" class="nav-back">${t.pvBack}</a>
+  </div>
 </nav>
 
 <div class="preview-layout">
@@ -729,68 +732,68 @@ input[type=range].slider::-moz-range-thumb {
   <div class="editor-panel">
 
     <div class="editor-header">
-      <span class="editor-kicker">Live Preview</span>
-      <h1 class="editor-title">design<br>your <em>label</em></h1>
+      <span class="editor-kicker">${t.pvKicker}</span>
+      <h1 class="editor-title">${t.pvTitleHtml}</h1>
     </div>
 
     <div class="editor-body">
       <div class="field">
-        <label for="f-brand">Brand / Company Name</label>
-        <input id="f-brand" type="text" placeholder="Larkfield &amp; Voss" />
+        <label for="f-brand">${t.pvBrand}</label>
+        <input id="f-brand" type="text" placeholder="${t.pvBrandPh}" />
       </div>
       <div class="field">
-        <label for="f-collection">Collection Name</label>
-        <input id="f-collection" type="text" placeholder="The Heritage Reserve" />
+        <label for="f-collection">${t.pvCollection}</label>
+        <input id="f-collection" type="text" placeholder="${t.pvCollectionPh}" />
       </div>
       <div class="field">
-        <label for="f-varietal">Wine / Varietal</label>
-        <input id="f-varietal" type="text" placeholder="Burgundy · Pinot Noir" />
+        <label for="f-varietal">${t.pvVarietal}</label>
+        <input id="f-varietal" type="text" placeholder="${t.pvVarietalPh}" />
       </div>
       <div class="field">
         <div class="field-row">
-          <label for="f-vintage">Vintage Year</label>
+          <label for="f-vintage">${t.pvVintage}</label>
           <div class="seg" id="vintage-format" role="group" aria-label="Vintage numeral format">
             <button type="button" class="seg-btn active" data-fmt="roman">MMXXV</button>
             <button type="button" class="seg-btn" data-fmt="arabic">2025</button>
           </div>
         </div>
-        <input id="f-vintage" type="text" placeholder="2025" maxlength="4" />
+        <input id="f-vintage" type="text" placeholder="${t.pvVintagePh}" maxlength="4" />
       </div>
       <div class="field">
-        <label>Label Style</label>
+        <label>${t.pvStyle}</label>
         <div class="style-chips" id="style-chips">
-          <button type="button" class="style-chip active" data-style="cream" aria-pressed="true">Cream Classic</button>
-          <button type="button" class="style-chip" data-style="noir" aria-pressed="false">Noir Prestige</button>
-          <button type="button" class="style-chip" data-style="blanc" aria-pressed="false">Blanc Épuré</button>
+          <button type="button" class="style-chip active" data-style="cream" aria-pressed="true">${t.pvStyleCream}</button>
+          <button type="button" class="style-chip" data-style="noir" aria-pressed="false">${t.pvStyleNoir}</button>
+          <button type="button" class="style-chip" data-style="blanc" aria-pressed="false">${t.pvStyleBlanc}</button>
         </div>
       </div>
 
       <div class="field">
-        <label>Text Sizes</label>
+        <label>${t.pvTextSizes}</label>
         <div class="size-group" id="size-group">
           <div class="size-row">
-            <span>Brand</span>
-            <input class="slider" type="range" min="55" max="150" value="100" data-target="brand" aria-label="Brand text size" />
+            <span>${t.pvSizeBrand}</span>
+            <input class="slider" type="range" min="55" max="150" value="100" data-target="brand" aria-label="${t.pvSizeBrand}" />
             <span class="field-val" data-val="brand">100%</span>
           </div>
           <div class="size-row">
-            <span>Collection</span>
-            <input class="slider" type="range" min="55" max="150" value="100" data-target="appellation" aria-label="Collection text size" />
+            <span>${t.pvSizeCollection}</span>
+            <input class="slider" type="range" min="55" max="150" value="100" data-target="appellation" aria-label="${t.pvSizeCollection}" />
             <span class="field-val" data-val="appellation">100%</span>
           </div>
           <div class="size-row">
-            <span>Réserve</span>
-            <input class="slider" type="range" min="55" max="150" value="100" data-target="class" aria-label="Classification text size" />
+            <span>${t.pvSizeClass}</span>
+            <input class="slider" type="range" min="55" max="150" value="100" data-target="class" aria-label="${t.pvSizeClass}" />
             <span class="field-val" data-val="class">100%</span>
           </div>
           <div class="size-row">
-            <span>Varietal</span>
-            <input class="slider" type="range" min="55" max="150" value="100" data-target="varietal" aria-label="Varietal text size" />
+            <span>${t.pvSizeVarietal}</span>
+            <input class="slider" type="range" min="55" max="150" value="100" data-target="varietal" aria-label="${t.pvSizeVarietal}" />
             <span class="field-val" data-val="varietal">100%</span>
           </div>
           <div class="size-row">
-            <span>Vintage</span>
-            <input class="slider" type="range" min="55" max="150" value="100" data-target="vintage" aria-label="Vintage text size" />
+            <span>${t.pvSizeVintage}</span>
+            <input class="slider" type="range" min="55" max="150" value="100" data-target="vintage" aria-label="${t.pvSizeVintage}" />
             <span class="field-val" data-val="vintage">100%</span>
           </div>
         </div>
@@ -798,8 +801,8 @@ input[type=range].slider::-moz-range-thumb {
     </div>
 
     <div class="editor-footer">
-      <button type="button" class="btn-order" id="btn-commission">Commission This Label</button>
-      <p class="preview-note"><b>Updates live</b> as you type. Download a print-ready file, or commission us to produce the finished bottle.</p>
+      <button type="button" class="btn-order" id="btn-commission">${t.pvCommission}</button>
+      <p class="preview-note">${t.pvNoteHtml}</p>
     </div>
 
   </div>
@@ -809,20 +812,20 @@ input[type=range].slider::-moz-range-thumb {
 <div class="dl-overlay" id="dl-overlay" hidden>
   <div class="dl-card" role="dialog" aria-modal="true" aria-labelledby="dl-title">
     <button type="button" class="dl-close" id="dl-close" aria-label="Close">×</button>
-    <span class="dl-kicker">Print-Ready Artwork</span>
-    <h2 class="dl-title" id="dl-title">Download your label</h2>
-    <p class="dl-note">High-resolution label artwork, ready for the printer. Choose a format:</p>
+    <span class="dl-kicker">${t.dlKicker}</span>
+    <h2 class="dl-title" id="dl-title">${t.dlTitle}</h2>
+    <p class="dl-note">${t.dlNote}</p>
     <div class="dl-actions">
       <button type="button" class="dl-btn" id="dl-png">
         <span class="dl-btn-fmt">PNG</span>
-        <span class="dl-btn-sub">300 DPI image</span>
+        <span class="dl-btn-sub">${t.dlPngSub}</span>
       </button>
       <button type="button" class="dl-btn" id="dl-pdf">
         <span class="dl-btn-fmt">PDF</span>
-        <span class="dl-btn-sub">print document</span>
+        <span class="dl-btn-sub">${t.dlPdfSub}</span>
       </button>
     </div>
-    <a href="/#contact" class="dl-commission">Prefer we print &amp; deliver it? Commission us →</a>
+    <a href="${lang === 'en' ? '/#contact' : '/fr#contact'}" class="dl-commission">${t.dlCommission}</a>
   </div>
 </div>
 
@@ -1105,7 +1108,7 @@ input[type=range].slider::-moz-range-thumb {
     pngBtn.disabled = true; pdfBtn.disabled = true;
     var sub = btn.querySelector('.dl-btn-sub');
     var original = sub.textContent;
-    sub.textContent = 'rendering…';
+    sub.textContent = '${t.dlRendering}';
     try {
       var canvas = await renderLabelCanvas();
       var name = fileBase();
@@ -1120,7 +1123,7 @@ input[type=range].slider::-moz-range-thumb {
       console.error('export failed', e);
       sub.textContent = 'failed — retry';
     }
-    if (sub.textContent === 'rendering…') sub.textContent = original;
+    if (sub.textContent === '${t.dlRendering}') sub.textContent = original;
     else setTimeout(function() { sub.textContent = original; }, 2000);
     pngBtn.disabled = false; pdfBtn.disabled = false;
   }
@@ -1131,3 +1134,4 @@ input[type=range].slider::-moz-range-thumb {
 </script>
 </body>
 </html>`;
+}
