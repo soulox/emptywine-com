@@ -1,0 +1,4 @@
+# Local dev secret for the contact-form Slack notification.
+# Copy to .dev.vars for local testing; set the real one in prod with:
+#   npx wrangler secret put SLACK_WEBHOOK_URL
+SLACK_WEBHOOK_URL=

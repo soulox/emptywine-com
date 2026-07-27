@@ -40,8 +40,35 @@ async function serveBottleImage(key: string, env: Env): Promise<Response> {
   });
 }
 
+// Post a formatted inquiry notification to a Slack Incoming Webhook.
+// The URL is a Worker secret (SLACK_WEBHOOK_URL); if unset, this is a no-op.
+// Never throws — notification failure must not affect the stored inquiry.
+async function notifySlack(
+  env: Env,
+  inquiry: { name: string; company: string; email: string; phone: string; message: string },
+): Promise<void> {
+  const webhook = (env as unknown as { SLACK_WEBHOOK_URL?: string }).SLACK_WEBHOOK_URL;
+  if (!webhook) return;
+  try {
+    const fields = [
+      `*Name:* ${inquiry.name}`,
+      `*Company:* ${inquiry.company}`,
+      `*Email:* ${inquiry.email}`,
+      inquiry.phone ? `*Phone:* ${inquiry.phone}` : null,
+    ].filter(Boolean).join('\n');
+    const text = `:wine_glass: *New emptywine inquiry*\n${fields}\n\n*Details:*\n${inquiry.message || '_(none)_'}`;
+    await fetch(webhook, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ text }),
+    });
+  } catch {
+    // swallow — the inquiry is already safely stored in KV
+  }
+}
+
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
     const { method, pathname } = { method: request.method, pathname: url.pathname };
 
@@ -190,6 +217,8 @@ export default {
         ip,
         receivedAt: new Date().toISOString(),
       }));
+      // Notify out-of-band so a slow/failed webhook never delays or breaks the response.
+      ctx.waitUntil(notifySlack(env, { name, company, email, phone, message }));
       return json({ success: true });
     }
 
