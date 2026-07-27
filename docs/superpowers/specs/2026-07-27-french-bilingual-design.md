@@ -10,9 +10,10 @@ The site is a single Cloudflare Worker (`src/index.ts`) serving two pages that a
 
 ## Decisions (locked)
 
-- **URL structure:** English stays at `/` and `/preview` (unchanged — protects current SEO). French at `/fr` and `/fr/preview`. All stable, indexable URLs.
+- **URL structure:** English at `/` and `/design`; French at `/fr` and `/fr/design`. The builder route is renamed `/preview` → **`/design`** (a word spelled identically and understood in both languages, so the path needs no translation). The old `/preview` and `/fr/preview` 301-redirect to the new paths (the route was only just added, but redirects avoid any stale link 404s). All language URLs are stable and indexable.
+- **Naming:** only the public route and nav word change to "Design"; the internal file `src/preview.ts` and `renderPreview()` keep their names to limit churn.
 - **Default behaviour:** root stays English; a visible EN/FR toggle switches languages. **No** Accept-Language auto-redirect.
-- **Scope:** both pages, full parity (landing + the `/preview` builder, including its UI, download modal, and validation/success messages).
+- **Scope:** both pages, full parity (landing + the `/design` builder, including its UI, download modal, and validation/success messages).
 - **Translation:** Claude writes professional corporate French (formal *vous*, luxury register), delivered as **draft for native review** before being treated as final.
 
 ## Architecture
@@ -21,7 +22,7 @@ One source of structure, two sets of copy — to prevent EN/FR layout drift.
 
 ### `src/i18n.ts` (new)
 - `export type Lang = 'en' | 'fr';`
-- `export interface Copy { ... }` — one field per user-facing string (nav items, hero kicker/title/sub/CTAs/meta, marquee industries, process steps, gallery captions, builder-CTA, ethos, contact form labels/placeholders/hints/validation/success, footer, preview builder UI, download modal, JS strings like "Sending…"/"rendering…", and per-page `<head>` values: title, description, og:title, og:description).
+- `export interface Copy { ... }` — one field per user-facing string (nav items, hero kicker/title/sub/CTAs/meta, marquee industries, process steps, gallery captions, builder-CTA, ethos, contact form labels/placeholders/hints/validation/success, footer, label-builder UI, download modal, JS strings like "Sending…"/"rendering…", and per-page `<head>` values: title, description, og:title, og:description).
 - `export const COPY: Record<Lang, Copy>` with `en` (extracted from current templates) and `fr` (new translations).
 - Small helper for the alternate-language URL and locale codes.
 
@@ -37,7 +38,8 @@ One source of structure, two sets of copy — to prevent EN/FR layout drift.
 ### `src/index.ts`
 - Routes:
   - `GET /` → `renderLanding('en')`; `GET /fr` and `/fr/` → `renderLanding('fr')`
-  - `GET /preview` → `renderPreview('en')`; `GET /fr/preview` → `renderPreview('fr')`
+  - `GET /design` → `renderPreview('en')`; `GET /fr/design` → `renderPreview('fr')`
+  - `GET /preview` → 301 `/design`; `GET /fr/preview` → 301 `/fr/design`
 - `sitemap.xml`: list all four page URLs, each `<url>` carrying `xhtml:link rel="alternate" hreflang` entries for en / fr / x-default (requires the `xmlns:xhtml` namespace on `<urlset>`).
 - `/api/contact`: unchanged validation (returns JSON codes, language-agnostic). The client posts an explicit `lang` field (`'en'`/`'fr'`) with the form; store it on the record and include it in the Slack message so the owner knows which site the inquiry came from. Slack copy stays English. (`lang` is untrusted input — coerce to exactly `'en'`/`'fr'`, default `'en'`.)
 - `robots.txt`: unchanged (already points at the sitemap).
@@ -51,7 +53,7 @@ One source of structure, two sets of copy — to prevent EN/FR layout drift.
 
 ## UX — language toggle
 
-- A compact **EN · FR** control in the nav; the inactive language links to the counterpart URL of the current page (`/` ⇄ `/fr`, `/preview` ⇄ `/fr/preview`); active language is styled as current and non-link.
+- A compact **EN · FR** control in the nav; the inactive language links to the counterpart URL of the current page (`/` ⇄ `/fr`, `/design` ⇄ `/fr/design`); active language is styled as current and non-link.
 - Mirror it in the footer.
 - The toggle preserves the page (does not always dump the user on the homepage).
 
@@ -71,11 +73,11 @@ One source of structure, two sets of copy — to prevent EN/FR layout drift.
 ## Testing / verification
 
 - `npm run check` (tsc + wrangler dry-run) passes.
-- Local dev: `/`, `/fr`, `/preview`, `/fr/preview` all return 200 with correct `<html lang>` and translated visible copy (headless render checks).
+- Local dev: `/`, `/fr`, `/design`, `/fr/design` all return 200 with correct `<html lang>` and translated visible copy (headless render checks); `/preview` and `/fr/preview` return 301 to the new paths.
 - Each page's `<head>` contains correct reciprocal hreflang, canonical, and og:locale (assert via curl/grep).
 - `sitemap.xml` validates: 4 URLs, alternate annotations present.
 - Language toggle navigates to the correct counterpart URL from each of the four pages.
-- The `/preview` builder works in French: live label updates, style switch, vintage toggle, per-field sizing, print export (PNG/PDF), and localized modal/validation.
+- The `/design` builder works in French: live label updates, style switch, vintage toggle, per-field sizing, print export (PNG/PDF), and localized modal/validation.
 - No horizontal overflow at 360px on the French pages (mirrors the English mobile QA).
 - Contact submission from `/fr` stores the record and the Slack message notes source language = fr.
 
