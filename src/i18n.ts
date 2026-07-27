@@ -169,11 +169,11 @@ const en: Copy = {
   pvCommission: 'Commission This Label',
   pvNoteHtml: '<b>Updates live</b> as you type. Download a print-ready file, or commission us to produce the finished bottle.',
   // download modal
-  dlKicker: 'Print-Ready Artwork',
+  dlKicker: 'Design Proof',
   dlTitle: 'Download your label',
-  dlNote: 'High-resolution label artwork, ready for the printer. Choose a format:',
-  dlPngSub: '300 DPI image',
-  dlPdfSub: 'print document',
+  dlNote: 'A print-ready design proof — 100 × 120 mm with 2.5 mm bleed, crop marks and a 2 mm safe margin, at 300 DPI. The final CMYK / PDF-X file is prepared at production. Choose a format:',
+  dlPngSub: 'PNG · 300 DPI',
+  dlPdfSub: 'PDF · lossless',
   dlCommission: 'Prefer we print &amp; deliver it? Commission us →',
   dlRendering: 'rendering…',
   // <head> per page
@@ -293,9 +293,9 @@ const fr: Copy = {
   pvCommission: 'Commander cette étiquette',
   pvNoteHtml: '<b>Mise à jour en direct</b> pendant que vous tapez. Téléchargez un fichier prêt à imprimer, ou confiez-nous la production de la bouteille finale.',
   // download modal
-  dlKicker: 'Fichier prêt à imprimer', dlTitle: 'Téléchargez votre étiquette',
-  dlNote: 'Visuel d’étiquette haute résolution, prêt pour l’impression. Choisissez un format :',
-  dlPngSub: 'image 300 DPI', dlPdfSub: 'document d’impression',
+  dlKicker: 'Épreuve d’impression', dlTitle: 'Téléchargez votre étiquette',
+  dlNote: 'Une épreuve prête pour l’impression — 100 × 120 mm avec 2,5 mm de fond perdu, repères de coupe et marge de sécurité de 2 mm, à 300 DPI. Le fichier final CMJN / PDF-X est préparé à l’impression. Choisissez un format :',
+  dlPngSub: 'PNG · 300 DPI', dlPdfSub: 'PDF · sans perte',
   dlCommission: 'Vous préférez qu’on l’imprime et la livre ? Commandez →', dlRendering: 'rendu…',
   // <head> design
   designTitle: 'Concevez votre étiquette — emptywine',

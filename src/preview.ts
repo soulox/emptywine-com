@@ -958,34 +958,50 @@ input[type=range].slider::-moz-range-thumb {
       await document.fonts.ready;
     } catch (e) {}
 
-    var W = 1240, H = 1400;
+    // ── Print geometry (300 DPI). Trim 100×120 mm, 2.5 mm bleed, 2 mm safe.
+    var DPI = 300, MM = DPI / 25.4;               // px per mm
+    var trimW = Math.round(100 * MM), trimH = Math.round(120 * MM);
+    var bleed = Math.round(2.5 * MM), safe = Math.round(2 * MM);
+    var margin = Math.round(12 * MM);             // room for crop marks
+    var capH = Math.round(9 * MM);                // caption strip (bottom)
+    var W = trimW + 2 * bleed + 2 * margin;
+    var H = trimH + 2 * bleed + 2 * margin + capH;
+    // box origins
+    var bleedX = margin, bleedY = margin, bleedW = trimW + 2 * bleed, bleedH = trimH + 2 * bleed;
+    var trimX = margin + bleed, trimY = margin + bleed;
+    var LH = trimH;                               // label content scales to trim height
+
     var canvas = document.createElement('canvas');
     canvas.width = W; canvas.height = H;
     var ctx = canvas.getContext('2d');
     var pal = PALETTES[currentStyle()];
 
-    // background
+    // proof surround (won't be part of the trimmed label)
+    ctx.fillStyle = '#eeebe4';
+    ctx.fillRect(0, 0, W, H);
+
+    // label background — fills the full bleed box so there is no white edge after cutting
     if (pal.bg.length === 1) {
       ctx.fillStyle = pal.bg[0];
     } else {
-      var g = ctx.createLinearGradient(0, 0, W * 0.35, H);
+      var g = ctx.createLinearGradient(bleedX, bleedY, bleedX + bleedW * 0.35, bleedY + bleedH);
       pal.bg.forEach(function(c, i) { g.addColorStop(pal.bg.length === 3 ? [0,0.45,1][i] : i, c); });
       ctx.fillStyle = g;
     }
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(bleedX, bleedY, bleedW, bleedH);
 
-    // frames
-    ctx.lineWidth = Math.max(1.5, H * 0.0016);
+    // decorative frames (relative to trim)
+    ctx.lineWidth = Math.max(1.5, LH * 0.0016);
     ctx.strokeStyle = pal.frameO;
-    ctx.strokeRect(0.07 * W, 0.07 * H, 0.86 * W, 0.86 * H);
+    ctx.strokeRect(trimX + 0.07 * trimW, trimY + 0.07 * trimH, 0.86 * trimW, 0.86 * trimH);
     ctx.strokeStyle = pal.frameI;
-    ctx.strokeRect(0.105 * W, 0.105 * H, 0.79 * W, 0.79 * H);
+    ctx.strokeRect(trimX + 0.105 * trimW, trimY + 0.105 * trimH, 0.79 * trimW, 0.79 * trimH);
 
-    // content geometry (padding % is relative to width in CSS)
-    var padX = 0.09 * W, padY = 0.08 * W;
-    var contentX = padX, contentW = W - 2 * padX;
-    var contentY = padY, contentH = H - 2 * padY;
-    var cx = W / 2;
+    // content geometry — kept inside the 2 mm safe margin
+    var padX = Math.max(0.09 * trimW, safe), padY = Math.max(0.08 * trimW, safe);
+    var contentX = trimX + padX, contentW = trimW - 2 * padX;
+    var contentY = trimY + padY, contentH = trimH - 2 * padY;
+    var cx = trimX + trimW / 2;
 
     function fontStr(el) {
       if (el.family === 'cg') return el.italic + ' ' + el.weight + ' ' + el.fs + 'px "Cormorant Garamond"';
@@ -994,18 +1010,18 @@ input[type=range].slider::-moz-range-thumb {
 
     // build ordered elements
     var els = [
-      { key:'app', text: txt('lbl-appellation').toUpperCase(), family:'m', weight:700, fs:0.056*H*scaleOf('appellation'), lh:1.1, ls:0.14, color:pal.app, mb:0.055*H },
-      { key:'brand', text: txt('lbl-brand'), family:'cg', italic:'italic', weight:500, fs:0.17*H*scaleOf('brand'), lh:1.0, ls:0, color:pal.brand, mb:0.04*H },
-      { key:'rule', rule:true, mb:0.04*H },
-      { key:'cls', text: txt('lbl-class').toUpperCase(), family:'m', weight:600, fs:0.052*H*scaleOf('class'), lh:1.1, ls:0.16, color:pal.cls, mb:0.035*H },
-      { key:'var', text: txt('lbl-varietal'), family:'cg', italic:'italic', weight:400, fs:0.085*H*scaleOf('varietal'), lh:1.05, ls:0, color:pal.var, mb:0.04*H },
-      { key:'vin', text: txt('lbl-vintage').toUpperCase(), family:'m', weight:600, fs:0.056*H*scaleOf('vintage'), lh:1.0, ls:0.22, color:pal.vin, mb:0 }
+      { key:'app', text: txt('lbl-appellation').toUpperCase(), family:'m', weight:700, fs:0.056*LH*scaleOf('appellation'), lh:1.1, ls:0.14, color:pal.app, mb:0.055*LH },
+      { key:'brand', text: txt('lbl-brand'), family:'cg', italic:'italic', weight:500, fs:0.17*LH*scaleOf('brand'), lh:1.0, ls:0, color:pal.brand, mb:0.04*LH },
+      { key:'rule', rule:true, mb:0.04*LH },
+      { key:'cls', text: txt('lbl-class').toUpperCase(), family:'m', weight:600, fs:0.052*LH*scaleOf('class'), lh:1.1, ls:0.16, color:pal.cls, mb:0.035*LH },
+      { key:'var', text: txt('lbl-varietal'), family:'cg', italic:'italic', weight:400, fs:0.085*LH*scaleOf('varietal'), lh:1.05, ls:0, color:pal.var, mb:0.04*LH },
+      { key:'vin', text: txt('lbl-vintage').toUpperCase(), family:'m', weight:600, fs:0.056*LH*scaleOf('vintage'), lh:1.0, ls:0.22, color:pal.vin, mb:0 }
     ];
 
     // measure (wrap text, compute heights)
     var total = 0;
     els.forEach(function(el) {
-      if (el.rule) { el.h = Math.max(2, H * 0.003); }
+      if (el.rule) { el.h = Math.max(2, LH * 0.003); }
       else {
         ctx.font = fontStr(el);
         ctx.letterSpacing = (el.ls * el.fs) + 'px';
@@ -1039,20 +1055,77 @@ input[type=range].slider::-moz-range-thumb {
       y += el.h + el.mb;
     });
     ctx.letterSpacing = '0px';
+
+    // ── proof guides: faint trim + safe rectangles (annotation on the proof)
+    ctx.save();
+    ctx.lineWidth = Math.max(1, MM * 0.12);
+    ctx.strokeStyle = 'rgba(30,26,22,0.28)';
+    ctx.strokeRect(trimX, trimY, trimW, trimH);                       // trim line
+    ctx.strokeStyle = 'rgba(40,120,190,0.5)';
+    ctx.setLineDash([MM * 2, MM * 1.6]);
+    ctx.strokeRect(trimX + safe, trimY + safe, trimW - 2 * safe, trimH - 2 * safe); // safe area
+    ctx.setLineDash([]);
+
+    // ── crop marks at the four trim corners, offset into the margin (past the bleed)
+    ctx.strokeStyle = '#1e1a16';
+    ctx.lineWidth = Math.max(1, MM * 0.12);
+    var gap = Math.round(1.5 * MM), len = Math.round(5 * MM);
+    var xs = [trimX, trimX + trimW], ys = [trimY, trimY + trimH];
+    var outX = [bleedX - gap, bleedX + bleedW + gap], outY = [bleedY - gap, bleedY + bleedH + gap];
+    function line(x1, y1, x2, y2) { ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); }
+    xs.forEach(function(x) {
+      line(x, outY[0], x, outY[0] - len);        // top vertical marks
+      line(x, outY[1], x, outY[1] + len);        // bottom vertical marks
+    });
+    ys.forEach(function(y) {
+      line(outX[0], y, outX[0] - len, y);        // left horizontal marks
+      line(outX[1], y, outX[1] + len, y);        // right horizontal marks
+    });
+    ctx.restore();
+
+    // ── spec caption in the bottom margin (single line, no overlap)
+    var isFr = ${lang === 'fr' ? 'true' : 'false'};
+    var specLeft = 'emptywine · ' + (isFr ? 'ÉPREUVE' : 'DESIGN PROOF');
+    var specRight = isFr
+      ? '100 × 120 mm  ·  fond perdu 2,5 mm  ·  300 DPI  ·  RVB → CMJN à l’impression'
+      : '100 × 120 mm  ·  bleed 2.5 mm  ·  300 DPI  ·  RGB → CMYK at print';
+    var capY = H - capH / 2;
+    ctx.fillStyle = '#6b655c';
+    ctx.textBaseline = 'middle';
+    ctx.letterSpacing = (MM * 0.08) + 'px';
+    ctx.textAlign = 'left';
+    ctx.font = '700 ' + Math.round(MM * 2.3) + 'px "Manrope"';
+    ctx.fillText(specLeft, margin, capY);
+    ctx.textAlign = 'right';
+    ctx.font = '500 ' + Math.round(MM * 2.0) + 'px "Manrope"';
+    ctx.fillText(specRight, W - margin, capY);
+    ctx.letterSpacing = '0px';
+
     return canvas;
   }
 
-  function dataURLToBytes(u) {
-    var bin = atob(u.split(',')[1]);
-    var a = new Uint8Array(bin.length);
-    for (var i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i);
-    return a;
+  // zlib-compress bytes (for a lossless /FlateDecode PDF image), no libraries
+  async function deflate(bytes) {
+    var cs = new CompressionStream('deflate');
+    var writer = cs.writable.getWriter();
+    writer.write(bytes); writer.close();
+    var chunks = [], reader = cs.readable.getReader();
+    for (;;) { var r = await reader.read(); if (r.done) break; chunks.push(r.value); }
+    var len = 0; chunks.forEach(function(c) { len += c.length; });
+    var out = new Uint8Array(len), o = 0;
+    chunks.forEach(function(c) { out.set(c, o); o += c.length; });
+    return out;
   }
 
-  // Minimal single-image PDF (JPEG via DCTDecode), no external libraries
-  function buildPDF(jpeg, w, h) {
+  // Lossless single-image PDF from the canvas (raw RGB via FlateDecode), no libraries
+  async function canvasToPDF(canvas) {
+    var w = canvas.width, h = canvas.height;
+    var data = canvas.getContext('2d').getImageData(0, 0, w, h).data; // RGBA, top-to-bottom
+    var rgb = new Uint8Array(w * h * 3);
+    for (var i = 0, j = 0; i < data.length; i += 4) { rgb[j++] = data[i]; rgb[j++] = data[i+1]; rgb[j++] = data[i+2]; }
+    var flate = await deflate(rgb);
     var pw = (w / 300 * 72).toFixed(2), ph = (h / 300 * 72).toFixed(2);
-    var enc = function(s) { var a = new Uint8Array(s.length); for (var i=0;i<s.length;i++) a[i] = s.charCodeAt(i) & 0xff; return a; };
+    var enc = function(s) { var a = new Uint8Array(s.length); for (var k=0;k<s.length;k++) a[k] = s.charCodeAt(k) & 0xff; return a; };
     var parts = [], offsets = [], pos = 0;
     function push(x) { var b = (typeof x === 'string') ? enc(x) : x; parts.push(b); pos += b.length; }
     function obj(n, body) { offsets[n] = pos; push(n + ' 0 obj\\n' + body + '\\nendobj\\n'); }
@@ -1062,19 +1135,19 @@ input[type=range].slider::-moz-range-thumb {
     obj(2, '<< /Type /Pages /Kids [3 0 R] /Count 1 >>');
     obj(3, '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + pw + ' ' + ph + '] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>');
     offsets[4] = pos;
-    push('4 0 obj\\n<< /Type /XObject /Subtype /Image /Width ' + w + ' /Height ' + h + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + jpeg.length + ' >>\\nstream\\n');
-    push(jpeg);
+    push('4 0 obj\\n<< /Type /XObject /Subtype /Image /Width ' + w + ' /Height ' + h + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /FlateDecode /Length ' + flate.length + ' >>\\nstream\\n');
+    push(flate);
     push('\\nendstream\\nendobj\\n');
     var content = 'q ' + pw + ' 0 0 ' + ph + ' 0 0 cm /Im0 Do Q';
     obj(5, '<< /Length ' + content.length + ' >>\\nstream\\n' + content + '\\nendstream');
     var xrefPos = pos, n = 6;
     var xref = 'xref\\n0 ' + n + '\\n0000000000 65535 f \\n';
-    for (var i = 1; i < n; i++) xref += ('0000000000' + offsets[i]).slice(-10) + ' 00000 n \\n';
+    for (var m = 1; m < n; m++) xref += ('0000000000' + offsets[m]).slice(-10) + ' 00000 n \\n';
     push(xref);
     push('trailer\\n<< /Size ' + n + ' /Root 1 0 R >>\\nstartxref\\n' + xrefPos + '\\n%%EOF');
     var totalLen = 0; parts.forEach(function(p) { totalLen += p.length; });
-    var out = new Uint8Array(totalLen), o = 0;
-    parts.forEach(function(p) { out.set(p, o); o += p.length; });
+    var out = new Uint8Array(totalLen), q = 0;
+    parts.forEach(function(p) { out.set(p, q); q += p.length; });
     return out;
   }
 
@@ -1089,7 +1162,7 @@ input[type=range].slider::-moz-range-thumb {
   function fileBase() {
     var b = txt('lbl-brand') || 'emptywine';
     var slug = b.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'label';
-    return slug + '-label';
+    return slug + '-label-proof';
   }
 
   var overlay = document.getElementById('dl-overlay');
@@ -1115,8 +1188,8 @@ input[type=range].slider::-moz-range-thumb {
       if (fmt === 'png') {
         await new Promise(function(res) { canvas.toBlob(function(b) { downloadBlob(b, name + '.png'); res(); }, 'image/png'); });
       } else {
-        var jpeg = dataURLToBytes(canvas.toDataURL('image/jpeg', 0.92));
-        downloadBlob(new Blob([buildPDF(jpeg, canvas.width, canvas.height)], { type: 'application/pdf' }), name + '.pdf');
+        var pdf = await canvasToPDF(canvas);
+        downloadBlob(new Blob([pdf], { type: 'application/pdf' }), name + '.pdf');
       }
       closeChooser();
     } catch (e) {
