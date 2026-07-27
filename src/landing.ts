@@ -33,18 +33,18 @@ export const LANDING_PAGE = `<!DOCTYPE html>
   --noir-2:   #f4f1ea;
   --noir-3:   #ece7dc;
   --noir-4:   #e4decf;
-  --gold:     #8a6a3c;
-  --gold-2:   #a3814f;
+  --gold:     #836237;
+  --gold-2:   #916f3f;
   --gold-3:   #6f5530;
   --gold-dim: rgba(138,106,60,0.14);
   --gold-rule: rgba(138,106,60,0.38);
-  --seal:     #8a6a3c;
+  --seal:     #836237;
   --cream:    #2a2723;
   --cream-2:  #211f1b;
   --cream-3:  #1a1815;
   --text:     #47423b;
   --text-2:   #6b655c;
-  --text-3:   #a79f93;
+  --text-3:   #787061;
   --border:   rgba(42,39,35,0.12);
   --error:    #a24b3a;
 }
@@ -986,7 +986,7 @@ body::after {
   font-family: 'Manrope', system-ui, -apple-system, sans-serif;
   font-style: normal;
   font-size: 1.2rem;
-  color: var(--gold-2);
+  color: var(--gold);
   padding: 28px 0;
   border-top: 1px solid var(--border);
   line-height: 1.7;

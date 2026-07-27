@@ -32,9 +32,9 @@ export const PREVIEW_PAGE = `<!DOCTYPE html>
   --ink:      #2a2723;
   --text:     #47423b;
   --muted:    #6b655c;
-  --faint:    #a79f93;
-  --bronze:   #8a6a3c;
-  --bronze-2: #a3814f;
+  --faint:    #787061;
+  --bronze:   #836237;
+  --bronze-2: #916f3f;
   --border:   rgba(42,39,35,0.12);
 
   /* label position on the SVG bottle (calibrated to the vector below) */
