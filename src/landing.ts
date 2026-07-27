@@ -848,6 +848,71 @@ body::after {
 .bcv-class { font-size: 0.5rem; font-weight: 600; margin-bottom: 12px; }
 .bcv-year { font-size: 0.56rem; font-weight: 600; letter-spacing: 0.3em; color: rgba(90,62,14,0.7); }
 
+/* ── TRUST / TESTIMONIALS ── */
+#trust {
+  padding: 120px 0;
+  background: var(--noir-2);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.trust-header { margin-bottom: 60px; max-width: 620px; }
+.trust-header .section-title { margin-top: 14px; }
+
+.trust-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+}
+
+.trust-quote {
+  background: var(--noir-2);
+  padding: 48px 44px 44px;
+  margin: 0;
+  position: relative;
+}
+
+.trust-quote::before {
+  content: '';
+  display: block;
+  width: 12px;
+  height: 12px;
+  background: var(--seal);
+  transform: rotate(45deg);
+  margin-bottom: 28px;
+  opacity: 0.85;
+}
+
+.trust-quote blockquote {
+  font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+  font-weight: 300;
+  font-size: 1.5rem;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  color: var(--cream);
+  margin: 0 0 26px;
+}
+
+.trust-quote figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  border-top: 1px solid var(--border);
+  padding-top: 18px;
+}
+
+.tq-role {
+  font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.tq-meta { font-size: 0.82rem; font-weight: 300; color: var(--text-3); font-style: italic; }
+
 /* ── CONTACT ── */
 #contact { padding: 120px 0; }
 
@@ -1102,7 +1167,8 @@ footer {
   .contact-layout { grid-template-columns: 1fr; gap: 56px; }
   .field-group { grid-template-columns: 1fr; }
   footer { padding: 32px 24px; flex-direction: column; text-align: center; }
-  #how, #gallery, #ethos, #contact, #builder-cta { padding: 84px 0; }
+  #how, #gallery, #ethos, #contact, #builder-cta, #trust { padding: 84px 0; }
+  .trust-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 560px) {
@@ -1358,6 +1424,31 @@ footer {
     </div>
   </div>
 </section>
+
+<!-- TRUST / TESTIMONIALS — HIDDEN until real content is ready.
+     To enable: delete the "<!- -" opener on the next line and the "- ->" closer
+     after </section>, then replace the two sample quotes with real, authorized
+     client testimonials. Styles live under the "TRUST / TESTIMONIALS" CSS block. -->
+<!--
+<section id="trust">
+  <div class="section-wrap">
+    <div class="trust-header reveal">
+      <span class="section-kicker">In Their Words</span>
+      <h2 class="section-title">gifts that <em>get remembered</em></h2>
+    </div>
+    <div class="trust-grid">
+      <figure class="trust-quote reveal reveal-d1">
+        <blockquote>“The bottle became the talking point of the whole evening — three clients asked where we had it made.”</blockquote>
+        <figcaption><span class="tq-role">Sample testimonial</span><span class="tq-meta">Replace with a real, authorized client quote</span></figcaption>
+      </figure>
+      <figure class="trust-quote reveal reveal-d2">
+        <blockquote>“It looked like it came from a century-old estate. No one believed the label was designed for us.”</blockquote>
+        <figcaption><span class="tq-role">Sample testimonial</span><span class="tq-meta">Replace with a real, authorized client quote</span></figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+-->
 
 <!-- CONTACT -->
 <section id="contact">
