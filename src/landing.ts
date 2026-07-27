@@ -1,24 +1,17 @@
-export const LANDING_PAGE = `<!DOCTYPE html>
-<html lang="en">
+import { COPY, Lang, headTags } from './i18n';
+
+export function renderLanding(lang: Lang): string {
+  const t = COPY[lang];
+  const alt = lang === 'en' ? '/fr' : '/';
+  const marqueeHtml = t.marquee.concat(t.marquee).map(function(m) {
+    return '    <span class="marquee-item"><strong>' + m + '</strong></span><span class="marquee-dot"></span>';
+  }).join('\n');
+  return `<!DOCTYPE html>
+<html lang="${lang}">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>emptywine — Bespoke Corporate Wine Gifts</title>
-<meta name="description" content="Custom AI-designed wine labels for corporate gifting. Your brand on every bottle. An unforgettable impression." />
-<link rel="canonical" href="https://emptywine.com/" />
-<meta property="og:type" content="website" />
-<meta property="og:site_name" content="emptywine" />
-<meta property="og:url" content="https://emptywine.com/" />
-<meta property="og:title" content="emptywine — Bespoke Corporate Wine Gifts" />
-<meta property="og:description" content="We design a bespoke wine label around your brand — an original, made only for you — and deliver it, beautifully, to every desk and doorstep that matters." />
-<meta property="og:image" content="https://emptywine.com/og.jpg" />
-<meta property="og:image:width" content="1200" />
-<meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="A wine bottle and two glasses of red wine on a table overlooking a sunlit Tuscan vineyard" />
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="emptywine — Bespoke Corporate Wine Gifts" />
-<meta name="twitter:description" content="A bespoke wine label around your brand, delivered beautifully to every desk and doorstep that matters." />
-<meta name="twitter:image" content="https://emptywine.com/og.jpg" />
+${headTags({ lang, path: '/', title: t.landingTitle, description: t.landingDesc, ogTitle: t.landingOgTitle, ogDescription: t.landingOgDesc })}
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -1210,13 +1203,13 @@ footer {
     <span class="brand-word">emptywine</span>
   </a>
   <ul class="nav-links">
-    <li><a href="#how">Process</a></li>
-    <li><a href="#gallery">Labels</a></li>
-    <li><a href="/preview">Label Builder</a></li>
-    <li><a href="#ethos">Why Us</a></li>
-    <li><a href="#contact">Contact</a></li>
+    <li><a href="#how">${t.navProcess}</a></li>
+    <li><a href="#gallery">${t.navLabels}</a></li>
+    <li><a href="/preview">${t.navDesign}</a></li>
+    <li><a href="#ethos">${t.navWhyUs}</a></li>
+    <li><a href="#contact">${t.navContact}</a></li>
   </ul>
-  <a href="#contact" class="nav-cta">Commission a Label</a>
+  <a href="#contact" class="nav-cta">${t.navCommission}</a>
 </nav>
 
 <!-- HERO -->
@@ -1225,17 +1218,17 @@ footer {
   <div class="hero-scrim" aria-hidden="true"></div>
   <div class="hero-overlay">
     <div class="hero-copy">
-      <span class="hero-kicker">Bespoke Corporate Wine Gifting</span>
-      <h1>the label<br>is the <em>gift</em></h1>
-      <p class="hero-sub">Give a bottle no one else can give. We design a wine label around your brand — an original, made only for you — and deliver it, beautifully, to every desk and doorstep that matters.</p>
+      <span class="hero-kicker">${t.heroKicker}</span>
+      <h1>${t.heroTitleHtml}</h1>
+      <p class="hero-sub">${t.heroSub}</p>
       <div class="hero-actions">
-        <a href="#contact" class="btn-primary">Commission a Label</a>
-        <a href="/preview" class="btn-ghost">Try the label builder →</a>
+        <a href="#contact" class="btn-primary">${t.heroCtaCommission}</a>
+        <a href="/preview" class="btn-ghost">${t.heroCtaBuilder}</a>
       </div>
       <div class="hero-meta">
-        <div class="hero-meta-item"><b>Origin</b>Bordeaux &amp; Burgundy estates</div>
-        <div class="hero-meta-item"><b>Format</b>75 cl, corked &amp; waxed</div>
-        <div class="hero-meta-item"><b>Delivery</b>By name, anywhere</div>
+        <div class="hero-meta-item"><b>${t.heroMetaOriginLabel}</b>${t.heroMetaOriginValue}</div>
+        <div class="hero-meta-item"><b>${t.heroMetaFormatLabel}</b>${t.heroMetaFormatValue}</div>
+        <div class="hero-meta-item"><b>${t.heroMetaDeliveryLabel}</b>${t.heroMetaDeliveryValue}</div>
       </div>
     </div>
   </div>
@@ -1244,22 +1237,7 @@ footer {
 <!-- MARQUEE -->
 <div id="marquee" aria-hidden="true">
   <div class="marquee-track">
-    <span class="marquee-item"><strong>Finance</strong></span><span class="marquee-dot"></span>
-    <span class="marquee-item"><strong>Technology</strong></span><span class="marquee-dot"></span>
-    <span class="marquee-item"><strong>Real Estate</strong></span><span class="marquee-dot"></span>
-    <span class="marquee-item"><strong>Consulting</strong></span><span class="marquee-dot"></span>
-    <span class="marquee-item"><strong>Luxury Retail</strong></span><span class="marquee-dot"></span>
-    <span class="marquee-item"><strong>Private Equity</strong></span><span class="marquee-dot"></span>
-    <span class="marquee-item"><strong>Architecture</strong></span><span class="marquee-dot"></span>
-    <span class="marquee-item"><strong>Law &amp; Advisory</strong></span><span class="marquee-dot"></span>
-    <span class="marquee-item"><strong>Finance</strong></span><span class="marquee-dot"></span>
-    <span class="marquee-item"><strong>Technology</strong></span><span class="marquee-dot"></span>
-    <span class="marquee-item"><strong>Real Estate</strong></span><span class="marquee-dot"></span>
-    <span class="marquee-item"><strong>Consulting</strong></span><span class="marquee-dot"></span>
-    <span class="marquee-item"><strong>Luxury Retail</strong></span><span class="marquee-dot"></span>
-    <span class="marquee-item"><strong>Private Equity</strong></span><span class="marquee-dot"></span>
-    <span class="marquee-item"><strong>Architecture</strong></span><span class="marquee-dot"></span>
-    <span class="marquee-item"><strong>Law &amp; Advisory</strong></span><span class="marquee-dot"></span>
+${marqueeHtml}
   </div>
 </div>
 
@@ -1268,30 +1246,30 @@ footer {
   <div class="section-wrap">
     <div class="how-inner">
       <div class="how-aside">
-        <span class="section-kicker reveal">The Process</span>
-        <h2 class="section-title reveal reveal-d1">from brief<br>to <em>bottle</em></h2>
-        <p class="section-sub reveal reveal-d2">Three steps, roughly three weeks. You are involved only where it matters — the brief and the final approval.</p>
+        <span class="section-kicker reveal">${t.howKicker}</span>
+        <h2 class="section-title reveal reveal-d1">${t.howTitleHtml}</h2>
+        <p class="section-sub reveal reveal-d2">${t.howSub}</p>
       </div>
       <div class="how-steps">
         <div class="how-step reveal">
           <span class="step-num">01</span>
           <div>
-            <h3 class="step-title">Share Your Brief</h3>
-            <p class="step-body">Tell us your brand, the occasion, and the impression you want to leave. Two minutes. No design experience required.</p>
+            <h3 class="step-title">${t.howStep1Title}</h3>
+            <p class="step-body">${t.howStep1Body}</p>
           </div>
         </div>
         <div class="how-step reveal reveal-d1">
           <span class="step-num">02</span>
           <div>
-            <h3 class="step-title">We Design Your Label</h3>
-            <p class="step-body">Our AI generates a bespoke label — refined by our team until it is unmistakably yours. You approve every detail.</p>
+            <h3 class="step-title">${t.howStep2Title}</h3>
+            <p class="step-body">${t.howStep2Body}</p>
           </div>
         </div>
         <div class="how-step reveal reveal-d2">
           <span class="step-num">03</span>
           <div>
-            <h3 class="step-title">Delivered to Impress</h3>
-            <p class="step-body">Premium bottles, your label, beautifully packaged. Delivered to your door or directly to each recipient.</p>
+            <h3 class="step-title">${t.howStep3Title}</h3>
+            <p class="step-body">${t.howStep3Body}</p>
           </div>
         </div>
       </div>
@@ -1304,10 +1282,10 @@ footer {
   <div class="section-wrap">
     <div class="gallery-header">
       <div>
-        <span class="section-kicker reveal">Label Design</span>
-        <h2 class="section-title reveal reveal-d1">every label,<br>a <em>story</em></h2>
+        <span class="section-kicker reveal">${t.galKicker}</span>
+        <h2 class="section-title reveal reveal-d1">${t.galTitleHtml}</h2>
       </div>
-      <p class="gallery-note reveal reveal-d2">Each design is generated uniquely for your brand. No templates. No off-the-shelf.</p>
+      <p class="gallery-note reveal reveal-d2">${t.galNote}</p>
     </div>
     <div class="gallery-grid">
 
@@ -1327,8 +1305,8 @@ footer {
             </div>
           </div>
         </div>
-        <p class="g-label-name">Aldergate &amp; Co</p>
-        <p class="g-label-desc">A heritage law firm’s ivory classic — bronze rules, estate-pressed restraint.</p>
+        <p class="g-label-name">${t.galCard1Name}</p>
+        <p class="g-label-desc">${t.galCard1Desc}</p>
       </div>
 
       <div class="g-label-wrap reveal reveal-d2">
@@ -1347,8 +1325,8 @@ footer {
             </div>
           </div>
         </div>
-        <p class="g-label-name">Vireon</p>
-        <p class="g-label-desc">A technology company in matte black and gold — commanding and modern.</p>
+        <p class="g-label-name">${t.galCard2Name}</p>
+        <p class="g-label-desc">${t.galCard2Desc}</p>
       </div>
 
       <div class="g-label-wrap reveal reveal-d4">
@@ -1367,8 +1345,8 @@ footer {
             </div>
           </div>
         </div>
-        <p class="g-label-name">Solstice Partners</p>
-        <p class="g-label-desc">A consulting firm’s pure-white minimal — precise type, a single wax seal.</p>
+        <p class="g-label-name">${t.galCard3Name}</p>
+        <p class="g-label-desc">${t.galCard3Desc}</p>
       </div>
 
     </div>
@@ -1380,10 +1358,10 @@ footer {
   <div class="section-wrap">
     <div class="builder-cta-inner reveal">
       <div class="builder-cta-copy">
-        <span class="section-kicker">Live Preview</span>
-        <h2 class="section-title">see it <em>before</em><br>you commission</h2>
-        <p class="section-sub">Type your company name, pick a style, and watch your label appear on the bottle — in seconds. Download it print-ready, or send it straight to us.</p>
-        <a href="/preview" class="btn-primary">Open the Label Builder →</a>
+        <span class="section-kicker">${t.bcKicker}</span>
+        <h2 class="section-title">${t.bcTitleHtml}</h2>
+        <p class="section-sub">${t.bcSub}</p>
+        <a href="/preview" class="btn-primary">${t.bcCta}</a>
       </div>
       <a href="/preview" class="builder-cta-visual" aria-label="Open the label builder">
         <span class="bcv-line bcv-appellation">Appellation Contrôlée</span>
@@ -1401,24 +1379,23 @@ footer {
   <div class="section-wrap">
     <div class="ethos-inner">
       <div>
-        <span class="section-kicker reveal ethos-kicker">Why emptywine</span>
+        <span class="section-kicker reveal ethos-kicker">${t.ethosKicker}</span>
         <blockquote class="ethos-quote reveal reveal-d1">
-          A bottle is poured and forgotten.
-          <em>A gift with their name on it is kept.</em>
+          ${t.ethosQuoteHtml}
         </blockquote>
       </div>
       <div class="ethos-list">
         <div class="ethos-item reveal reveal-d2">
-          <span class="ethos-num">No two alike</span>
-          <p class="ethos-body">Every label is generated for your brand alone — no templates, no stock art, nothing another company could ever receive.</p>
+          <span class="ethos-num">${t.ethos1Term}</span>
+          <p class="ethos-body">${t.ethos1Body}</p>
         </div>
         <div class="ethos-item reveal reveal-d3">
-          <span class="ethos-num">Finished by hand</span>
-          <p class="ethos-body">AI gives us the first draft in seconds. Our designers refine it until it looks like it was pressed by a century-old estate.</p>
+          <span class="ethos-num">${t.ethos2Term}</span>
+          <p class="ethos-body">${t.ethos2Body}</p>
         </div>
         <div class="ethos-item reveal reveal-d4">
-          <span class="ethos-num">Delivered anywhere</span>
-          <p class="ethos-body">Premium wine, your label, presentation packaging. Sent to your office in one crate or to each recipient by name.</p>
+          <span class="ethos-num">${t.ethos3Term}</span>
+          <p class="ethos-body">${t.ethos3Body}</p>
         </div>
       </div>
     </div>
@@ -1433,8 +1410,8 @@ footer {
 <section id="trust">
   <div class="section-wrap">
     <div class="trust-header reveal">
-      <span class="section-kicker">In Their Words</span>
-      <h2 class="section-title">gifts that <em>get remembered</em></h2>
+      <span class="section-kicker">${t.trustKicker}</span>
+      <h2 class="section-title">${t.trustTitleHtml}</h2>
     </div>
     <div class="trust-grid">
       <figure class="trust-quote reveal reveal-d1">
@@ -1455,57 +1432,57 @@ footer {
   <div class="section-wrap">
     <div class="contact-layout">
       <div class="contact-intro">
-        <span class="section-kicker reveal">Get in Touch</span>
-        <h2 class="section-title reveal reveal-d1">commission<br>your <em>label</em></h2>
-        <p class="section-sub reveal reveal-d2">Tell us about your gifting needs and we will respond within 24 hours with a proposal and sample designs.</p>
+        <span class="section-kicker reveal">${t.contactKicker}</span>
+        <h2 class="section-title reveal reveal-d1">${t.contactTitleHtml}</h2>
+        <p class="section-sub reveal reveal-d2">${t.contactSub}</p>
         <div class="contact-detail reveal reveal-d3">
-          <span class="contact-detail-label">Email</span>
+          <span class="contact-detail-label">${t.contactEmailLabel}</span>
           <span class="contact-detail-value">hello@emptywine.com</span>
         </div>
         <div class="contact-detail reveal reveal-d4">
-          <span class="contact-detail-label">Response Time</span>
-          <span class="contact-detail-value">Within 24 hours</span>
+          <span class="contact-detail-label">${t.contactResponseLabel}</span>
+          <span class="contact-detail-value">${t.contactResponseValue}</span>
         </div>
       </div>
       <div class="reveal reveal-d2">
         <form class="contact-form" id="contact-form" novalidate>
-          <div id="contact-error" role="alert">Something went wrong sending your inquiry. Please try again, or email hello@emptywine.com directly.</div>
+          <div id="contact-error" role="alert">${t.cfError}</div>
           <div class="field-group">
             <div class="field">
-              <label for="cf-name">Full Name</label>
-              <input id="cf-name" name="name" type="text" placeholder="Rosalind Achebe" required />
-              <span class="field-error">Please enter your name.</span>
+              <label for="cf-name">${t.cfName}</label>
+              <input id="cf-name" name="name" type="text" placeholder="${t.cfNamePh}" required />
+              <span class="field-error">${t.cfNameErr}</span>
             </div>
             <div class="field">
-              <label for="cf-company">Company</label>
-              <input id="cf-company" name="company" type="text" placeholder="Larkfield &amp; Voss" required />
-              <span class="field-error">Please enter your company.</span>
+              <label for="cf-company">${t.cfCompany}</label>
+              <input id="cf-company" name="company" type="text" placeholder="${t.cfCompanyPh}" required />
+              <span class="field-error">${t.cfCompanyErr}</span>
             </div>
           </div>
           <div class="field-group">
             <div class="field">
-              <label for="cf-email">Email</label>
-              <input id="cf-email" name="email" type="email" placeholder="rosalind@larkfield.co" required />
-              <span class="field-error">Please enter a valid email address.</span>
+              <label for="cf-email">${t.cfEmail}</label>
+              <input id="cf-email" name="email" type="email" placeholder="${t.cfEmailPh}" required />
+              <span class="field-error">${t.cfEmailErr}</span>
             </div>
             <div class="field">
-              <label for="cf-phone">Phone (optional)</label>
-              <input id="cf-phone" name="phone" type="tel" placeholder="+1 (415) 662-0473" />
+              <label for="cf-phone">${t.cfPhone}</label>
+              <input id="cf-phone" name="phone" type="tel" placeholder="${t.cfPhonePh}" />
             </div>
           </div>
           <div class="field">
-            <label for="cf-message">Occasion &amp; Details</label>
-            <textarea id="cf-message" name="message" placeholder="e.g. 200 bottles for our annual client dinner in November. Dark label, company logo, Bordeaux preferred."></textarea>
-            <span class="field-hint">The more you tell us, the closer the first sample lands.</span>
+            <label for="cf-message">${t.cfMessage}</label>
+            <textarea id="cf-message" name="message" placeholder="${t.cfMessagePh}"></textarea>
+            <span class="field-hint">${t.cfHint}</span>
           </div>
           <div class="hp-field" aria-hidden="true">
             <label for="cf-website">Leave this field blank</label>
             <input id="cf-website" name="website" type="text" tabindex="-1" autocomplete="off" />
           </div>
-          <button type="submit">Send Inquiry</button>
+          <button type="submit">${t.cfSubmit}</button>
         </form>
         <div id="contact-success" role="status" aria-live="polite">
-          <p>Thank you — we will be in touch within 24 hours.</p>
+          <p>${t.cfSuccess}</p>
         </div>
       </div>
     </div>
@@ -1522,12 +1499,12 @@ footer {
     </svg>
     <span class="brand-word">emptywine</span>
   </a>
-  <p class="footer-copy">© 2026 emptywine. All rights reserved.</p>
+  <p class="footer-copy">${t.footerCopy}</p>
   <nav class="footer-links" aria-label="Footer navigation">
-    <a href="#how">Process</a>
-    <a href="#gallery">Labels</a>
-    <a href="#ethos">Why Us</a>
-    <a href="#contact">Contact</a>
+    <a href="#how">${t.navProcess}</a>
+    <a href="#gallery">${t.navLabels}</a>
+    <a href="#ethos">${t.navWhyUs}</a>
+    <a href="#contact">${t.navContact}</a>
   </nav>
 </footer>
 
@@ -1603,7 +1580,7 @@ footer {
 
       var btn = form.querySelector('button[type="submit"]');
       var original = btn.textContent;
-      btn.textContent = 'Sending...';
+      btn.textContent = '${t.cfSending}';
       btn.disabled = true;
       var data = {};
       new FormData(form).forEach(function(val, key) { data[key] = val; });
@@ -1627,3 +1604,4 @@ footer {
 </script>
 </body>
 </html>`;
+}

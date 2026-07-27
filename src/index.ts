@@ -1,4 +1,4 @@
-import { LANDING_PAGE } from './landing';
+import { renderLanding } from './landing';
 import { PREVIEW_PAGE } from './preview';
 import { OG_IMAGE_B64 } from './og';
 
@@ -73,7 +73,7 @@ export default {
     const { method, pathname } = { method: request.method, pathname: url.pathname };
 
     if (method === 'GET' && pathname === '/') {
-      return new Response(LANDING_PAGE, {
+      return new Response(renderLanding('en'), {
         headers: { 'content-type': 'text/html;charset=UTF-8' },
       });
     }
