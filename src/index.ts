@@ -78,6 +78,13 @@ export default {
       });
     }
 
+    // GET /fr → French landing page
+    if (method === 'GET' && (pathname === '/fr' || pathname === '/fr/')) {
+      return new Response(renderLanding('fr'), {
+        headers: { 'content-type': 'text/html;charset=UTF-8' },
+      });
+    }
+
     // GET /og.jpg → social share image (Open Graph / Twitter card)
     if (method === 'GET' && pathname === '/og.jpg') {
       return new Response(getOgImage(), {

@@ -187,9 +187,103 @@ const en: Copy = {
   designOgDesc: 'Preview a bespoke wine label for your brand, live. Type your name, pick a style, and see it on the bottle.',
 };
 
+const fr: Copy = {
+  ...en,
+  // nav
+  navProcess: 'Processus',
+  navLabels: 'Étiquettes',
+  navDesign: 'Design',
+  navWhyUs: 'Pourquoi nous',
+  navContact: 'Contact',
+  navCommission: 'Commander une étiquette',
+  // hero
+  heroKicker: 'Cadeaux d’entreprise en vin sur mesure',
+  heroTitleHtml: 'l’étiquette<br>est le <em>cadeau</em>',
+  heroSub: 'Offrez une bouteille que personne d’autre ne peut offrir. Nous concevons une étiquette de vin à l’image de votre marque — une création originale, faite pour vous seul — et la livrons, avec élégance, sur chaque bureau et à chaque porte qui compte.',
+  heroCtaCommission: 'Commander une étiquette',
+  heroCtaBuilder: 'Essayer le générateur →',
+  heroMetaOriginLabel: 'Origine',
+  heroMetaOriginValue: 'Domaines de Bordeaux et Bourgogne',
+  heroMetaFormatLabel: 'Format',
+  heroMetaFormatValue: '75 cl, bouché et ciré',
+  heroMetaDeliveryLabel: 'Livraison',
+  heroMetaDeliveryValue: 'Nominative, partout',
+  // marquee
+  marquee: ['Finance', 'Technologie', 'Immobilier', 'Conseil', 'Luxe', 'Capital-investissement', 'Architecture', 'Droit & Conseil'],
+  // process
+  howKicker: 'Le Processus',
+  howTitleHtml: 'du brief<br>à la <em>bouteille</em>',
+  howSub: 'Trois étapes, environ trois semaines. Vous n’intervenez que là où cela compte — le brief et l’approbation finale.',
+  howStep1Title: 'Partagez votre brief',
+  howStep1Body: 'Dites-nous votre marque, l’occasion et l’impression que vous souhaitez laisser. Deux minutes. Aucune expérience en design requise.',
+  howStep2Title: 'Nous concevons votre étiquette',
+  howStep2Body: 'Notre IA génère une étiquette sur mesure — affinée par notre équipe jusqu’à ce qu’elle soit incontestablement la vôtre. Vous validez chaque détail.',
+  howStep3Title: 'Livrée pour impressionner',
+  howStep3Body: 'Des bouteilles premium, votre étiquette, un écrin soigné. Livrées à votre porte ou directement à chaque destinataire.',
+  // gallery
+  galKicker: 'Design d’étiquette',
+  galTitleHtml: 'chaque étiquette,<br>une <em>histoire</em>',
+  galNote: 'Chaque design est généré uniquement pour votre marque. Aucun modèle. Rien de tout fait.',
+  galCard1Name: 'Aldergate &amp; Co',
+  galCard1Desc: 'Le classique ivoire d’un cabinet d’avocats de tradition — filets de bronze, sobriété d’un grand domaine.',
+  galCard2Name: 'Vireon',
+  galCard2Desc: 'Une entreprise technologique en noir mat et or — affirmée et moderne.',
+  galCard3Name: 'Solstice Partners',
+  galCard3Desc: 'Le blanc épuré d’un cabinet de conseil — typographie précise, un seul sceau de cire.',
+  // builder CTA
+  bcKicker: 'Aperçu en direct',
+  bcTitleHtml: 'voyez-la <em>avant</em><br>de commander',
+  bcSub: 'Saisissez le nom de votre entreprise, choisissez un style et regardez votre étiquette apparaître sur la bouteille — en quelques secondes. Téléchargez-la prête à imprimer, ou envoyez-la-nous directement.',
+  bcCta: 'Ouvrir le générateur →',
+  // ethos
+  ethosKicker: 'Pourquoi emptywine',
+  ethosQuoteHtml: 'Une bouteille se boit et s’oublie.\n      <em>Un cadeau qui porte leur nom se garde.</em>',
+  ethos1Term: 'Aucune ne se ressemble',
+  ethos1Body: 'Chaque étiquette est générée pour votre marque seule — aucun modèle, aucune image de banque, rien qu’une autre entreprise pourrait recevoir.',
+  ethos2Term: 'Finie à la main',
+  ethos2Body: 'L’IA nous donne la première ébauche en quelques secondes. Nos designers l’affinent jusqu’à ce qu’elle semble pressée par un domaine centenaire.',
+  ethos3Term: 'Livrée partout',
+  ethos3Body: 'Vin premium, votre étiquette, emballage de présentation. Envoyé à votre bureau en une caisse, ou à chaque destinataire nommément.',
+  // trust (hidden)
+  trustKicker: 'En leurs mots',
+  trustTitleHtml: 'des cadeaux dont <em>on se souvient</em>',
+  // contact
+  contactKicker: 'Nous contacter',
+  contactTitleHtml: 'commandez<br>votre <em>étiquette</em>',
+  contactSub: 'Parlez-nous de vos besoins en cadeaux et nous répondrons sous 24 heures avec une proposition et des designs d’exemple.',
+  contactEmailLabel: 'E-mail',
+  contactResponseLabel: 'Délai de réponse',
+  contactResponseValue: 'Sous 24 heures',
+  cfName: 'Nom complet',
+  cfNamePh: 'Rosalind Achebe',
+  cfNameErr: 'Veuillez saisir votre nom.',
+  cfCompany: 'Entreprise',
+  cfCompanyPh: 'Larkfield &amp; Voss',
+  cfCompanyErr: 'Veuillez saisir votre entreprise.',
+  cfEmail: 'E-mail',
+  cfEmailPh: 'rosalind@larkfield.co',
+  cfEmailErr: 'Veuillez saisir une adresse e-mail valide.',
+  cfPhone: 'Téléphone (facultatif)',
+  cfPhonePh: '+33 1 42 68 53 00',
+  cfMessage: 'Occasion & détails',
+  cfMessagePh: 'ex. 200 bouteilles pour notre dîner client annuel en novembre. Étiquette sombre, logo de l’entreprise, Bordeaux de préférence.',
+  cfHint: 'Plus vous nous en dites, plus le premier échantillon sera juste.',
+  cfSubmit: 'Envoyer la demande',
+  cfSending: 'Envoi…',
+  cfSuccess: 'Merci — nous vous recontacterons sous 24 heures.',
+  cfError: 'Une erreur est survenue lors de l’envoi. Réessayez, ou écrivez-nous directement à hello@emptywine.com.',
+  // footer
+  footerCopy: '© 2026 emptywine. Tous droits réservés.',
+  // <head>
+  landingTitle: 'emptywine — Cadeaux d’entreprise en vin sur mesure',
+  landingDesc: 'Des étiquettes de vin sur mesure conçues par IA pour vos cadeaux d’entreprise. Votre marque sur chaque bouteille. Une impression inoubliable.',
+  landingOgTitle: 'emptywine — Cadeaux d’entreprise en vin sur mesure',
+  landingOgDesc: 'Une étiquette de vin sur mesure à l’image de votre marque, livrée avec élégance sur chaque bureau et à chaque porte qui compte.',
+};
+
 export const COPY: Record<Lang, Copy> = {
   en,
-  fr: { ...en },
+  fr,
 };
 
 export function otherLang(l: Lang): Lang { return l === 'en' ? 'fr' : 'en'; }

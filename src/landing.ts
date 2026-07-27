@@ -1,4 +1,4 @@
-import { COPY, Lang, headTags } from './i18n';
+import { COPY, Lang, headTags, otherLang } from './i18n';
 
 export function renderLanding(lang: Lang): string {
   const t = COPY[lang];
@@ -168,6 +168,18 @@ body::after {
 }
 
 .nav-cta:hover { background: var(--cream); color: var(--noir); border-color: var(--cream); }
+
+.nav-right { display: inline-flex; align-items: center; gap: 22px; }
+
+.lang-toggle { display: inline-flex; align-items: center; gap: 7px; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; }
+.lang-toggle .lang-current { color: var(--gold); }
+.lang-toggle a { color: var(--text-2); text-decoration: none; transition: color 0.2s; }
+.lang-toggle a:hover { color: var(--gold); }
+.footer-links .lang-toggle { text-transform: uppercase; }
+/* readable over the dark hero banner */
+#main-nav:not(.scrolled) .lang-toggle .lang-current { color: #ecca82; }
+#main-nav:not(.scrolled) .lang-toggle a { color: rgba(253,250,243,0.75); }
+#main-nav:not(.scrolled) .lang-toggle a:hover { color: #ffffff; }
 
 /* ── HERO ── */
 #hero {
@@ -1209,7 +1221,13 @@ footer {
     <li><a href="#ethos">${t.navWhyUs}</a></li>
     <li><a href="#contact">${t.navContact}</a></li>
   </ul>
-  <a href="#contact" class="nav-cta">${t.navCommission}</a>
+  <div class="nav-right">
+    <div class="lang-toggle" aria-label="Language">
+      <span class="lang-current">${lang === 'en' ? 'EN' : 'FR'}</span>
+      <a href="${alt}" hreflang="${otherLang(lang)}" aria-label="${lang === 'en' ? 'Voir en français' : 'View in English'}">${lang === 'en' ? 'FR' : 'EN'}</a>
+    </div>
+    <a href="#contact" class="nav-cta">${t.navCommission}</a>
+  </div>
 </nav>
 
 <!-- HERO -->
@@ -1505,6 +1523,10 @@ ${marqueeHtml}
     <a href="#gallery">${t.navLabels}</a>
     <a href="#ethos">${t.navWhyUs}</a>
     <a href="#contact">${t.navContact}</a>
+    <span class="lang-toggle" aria-label="Language">
+      <span class="lang-current">${lang === 'en' ? 'EN' : 'FR'}</span>
+      <a href="${alt}" hreflang="${otherLang(lang)}">${lang === 'en' ? 'FR' : 'EN'}</a>
+    </span>
   </nav>
 </footer>
 
