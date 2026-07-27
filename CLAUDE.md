@@ -20,14 +20,17 @@ There is no test suite and no linter configured.
 
 Everything runs in one `fetch` handler. There is no router framework — `src/index.ts` matches `method`/`pathname` with sequential `if` blocks and returns `404` at the end. Routes:
 
-- `GET /` → serves `LANDING_PAGE`
-- `GET /preview` → serves `PREVIEW_PAGE` (live label-mockup builder)
-- `GET /assets/*` → proxies objects out of the R2 `ASSETS` bucket (e.g. `/assets/bottle.png`)
-- `GET /api/bottle/{hero|cream|noir|blanc}` → AI-generated bottle image, KV-cached
+- `GET /` (English) / `GET /fr` (French) → `renderLanding(lang)`
+- `GET /design` (English) / `GET /fr/design` (French) → `renderPreview(lang)` (live label-mockup builder)
+- `GET /preview` and `/fr/preview` → 301 redirects to the `/design` paths (legacy)
+- `GET /og.jpg` → Open Graph share image (1200×630 JPEG from `src/og.ts`)
+- `GET /robots.txt`, `GET /sitemap.xml` (multilingual, with en/fr/x-default `xhtml:link` alternates)
+- `GET /assets/*` → proxies objects out of the R2 `ASSETS` bucket
+- `GET /api/bottle/{hero|cream|noir|blanc|banner|previewBottle}` → AI-generated bottle image, KV-cached
 - `POST /api/generate` → AI-generated custom label from `{company, style}` JSON
-- `POST /api/contact` → stores contact-form submissions in KV
+- `POST /api/contact` → spam-checked (honeypot + timing + per-IP rate limit + validation); stores submissions in KV and fires a Slack notification (`SLACK_WEBHOOK_URL` secret)
 
-The two HTML pages are **entire documents exported as template-literal strings** from `src/landing.ts` and `src/preview.ts` (CSS in a `<style>` block, JS in a `<script>` block, all inline). There is no front-end build step, no framework, and no static asset bundling for the pages themselves — edit the strings directly. Client JS is plain ES5-style IIFEs.
+**Bilingual (i18n):** the site is English + French. All user-facing copy lives in a typed dictionary in `src/i18n.ts` (`type Lang = 'en'|'fr'`, `interface Copy`, `COPY.en`/`COPY.fr`, plus `otherLang`/`ogLocale`/`headTags` helpers). The two HTML pages are **entire documents built by `renderLanding(lang)` / `renderPreview(lang)`** in `src/landing.ts` / `src/preview.ts` — they interpolate `COPY[lang]` for strings while all CSS/SVG/image-data-URIs stay shared literals, so the two languages cannot drift visually. A `Copy` field must be added to BOTH `en` and `fr`. `headTags()` emits per-language `<title>`, description, canonical, reciprocal hreflang, and og:locale. There is no front-end build step, no framework; client JS is plain ES5-style IIFEs. French copy is **draft — pending native review**.
 
 ### Bindings (`wrangler.json` → `Env` in `worker-configuration.d.ts`)
 

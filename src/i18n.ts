@@ -334,6 +334,7 @@ export function headTags(o: { lang: Lang; path: string; title: string; descripti
     '<meta property="og:image" content="https://emptywine.com/og.jpg" />',
     '<meta property="og:image:width" content="1200" />',
     '<meta property="og:image:height" content="630" />',
+    '<meta property="og:image:alt" content="' + (o.lang === 'fr' ? 'Une bouteille de vin et deux verres de vin rouge sur une table devant un vignoble toscan ensoleillé' : 'A wine bottle and two glasses of red wine on a table overlooking a sunlit Tuscan vineyard') + '" />',
     '<meta property="og:locale" content="' + ogLocale(o.lang) + '" />',
     '<meta property="og:locale:alternate" content="' + ogLocale(otherLang(o.lang)) + '" />',
     '<meta name="twitter:card" content="summary_large_image" />',
