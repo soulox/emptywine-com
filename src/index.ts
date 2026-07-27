@@ -45,7 +45,7 @@ async function serveBottleImage(key: string, env: Env): Promise<Response> {
 // Never throws — notification failure must not affect the stored inquiry.
 async function notifySlack(
   env: Env,
-  inquiry: { name: string; company: string; email: string; phone: string; message: string },
+  inquiry: { name: string; company: string; email: string; phone: string; message: string; lang: string },
 ): Promise<void> {
   const webhook = (env as unknown as { SLACK_WEBHOOK_URL?: string }).SLACK_WEBHOOK_URL;
   if (!webhook) return;
@@ -55,6 +55,7 @@ async function notifySlack(
       `*Company:* ${inquiry.company}`,
       `*Email:* ${inquiry.email}`,
       inquiry.phone ? `*Phone:* ${inquiry.phone}` : null,
+      `*Language:* ${inquiry.lang === 'fr' ? 'French (/fr)' : 'English'}`,
     ].filter(Boolean).join('\n');
     const text = `:wine_glass: *New emptywine inquiry*\n${fields}\n\n*Details:*\n${inquiry.message || '_(none)_'}`;
     await fetch(webhook, {
@@ -115,18 +116,29 @@ export default {
       });
     }
 
-    // GET /sitemap.xml
+    // GET /sitemap.xml — multilingual (en/fr) with reciprocal alternates
     if (method === 'GET' && pathname === '/sitemap.xml') {
+      const loc = (p: string) => 'https://emptywine.com' + p;
+      const alts = (en: string, fr: string) =>
+        `<xhtml:link rel="alternate" hreflang="en" href="${loc(en)}"/>` +
+        `<xhtml:link rel="alternate" hreflang="fr" href="${loc(fr)}"/>` +
+        `<xhtml:link rel="alternate" hreflang="x-default" href="${loc(en)}"/>`;
       const body = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://emptywine.com/</loc><changefreq>monthly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://emptywine.com/preview</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url><loc>${loc('/')}</loc>${alts('/', '/fr')}<priority>1.0</priority></url>
+  <url><loc>${loc('/fr')}</loc>${alts('/', '/fr')}<priority>1.0</priority></url>
+  <url><loc>${loc('/design')}</loc>${alts('/design', '/fr/design')}<priority>0.8</priority></url>
+  <url><loc>${loc('/fr/design')}</loc>${alts('/design', '/fr/design')}<priority>0.8</priority></url>
 </urlset>
 `;
       return new Response(body, {
         headers: { 'content-type': 'application/xml;charset=UTF-8', 'cache-control': 'public, max-age=86400' },
       });
     }
+
+    // Legacy /preview → 301 to the renamed /design paths
+    if (method === 'GET' && pathname === '/preview') return Response.redirect('https://emptywine.com/design', 301);
+    if (method === 'GET' && pathname === '/fr/preview') return Response.redirect('https://emptywine.com/fr/design', 301);
 
     // GET /assets/* → serve from R2
     if (method === 'GET' && pathname.startsWith('/assets/')) {
@@ -223,14 +235,17 @@ export default {
       // Link-spam heuristic: legitimate inquiries rarely contain many URLs.
       if ((message.match(/https?:\/\//gi) || []).length > 3) return decoy();
 
+      // Which site the inquiry came from (untrusted — coerce to en/fr).
+      const lang = String((body as { lang?: unknown }).lang ?? 'en') === 'fr' ? 'fr' : 'en';
+
       const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       await env.CONTACTS.put(`contact:${id}`, JSON.stringify({
         id, name, company, email, phone, message,
-        ip,
+        lang, ip,
         receivedAt: new Date().toISOString(),
       }));
       // Notify out-of-band so a slow/failed webhook never delays or breaks the response.
-      ctx.waitUntil(notifySlack(env, { name, company, email, phone, message }));
+      ctx.waitUntil(notifySlack(env, { name, company, email, phone, message, lang }));
       return json({ success: true });
     }
 

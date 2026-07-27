@@ -1608,6 +1608,7 @@ ${marqueeHtml}
       var data = {};
       new FormData(form).forEach(function(val, key) { data[key] = val; });
       data.elapsed = Date.now() - formReadyAt;
+      data.lang = ${JSON.stringify(lang)};
       fetch('/api/contact', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
