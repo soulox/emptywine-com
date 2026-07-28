@@ -1104,52 +1104,6 @@ input[type=range].slider::-moz-range-thumb {
     return canvas;
   }
 
-  // zlib-compress bytes (for a lossless /FlateDecode PDF image), no libraries
-  async function deflate(bytes) {
-    var cs = new CompressionStream('deflate');
-    var writer = cs.writable.getWriter();
-    writer.write(bytes); writer.close();
-    var chunks = [], reader = cs.readable.getReader();
-    for (;;) { var r = await reader.read(); if (r.done) break; chunks.push(r.value); }
-    var len = 0; chunks.forEach(function(c) { len += c.length; });
-    var out = new Uint8Array(len), o = 0;
-    chunks.forEach(function(c) { out.set(c, o); o += c.length; });
-    return out;
-  }
-
-  // Lossless single-image PDF from the canvas (raw RGB via FlateDecode), no libraries
-  async function canvasToPDF(canvas) {
-    var w = canvas.width, h = canvas.height;
-    var data = canvas.getContext('2d').getImageData(0, 0, w, h).data; // RGBA, top-to-bottom
-    var rgb = new Uint8Array(w * h * 3);
-    for (var i = 0, j = 0; i < data.length; i += 4) { rgb[j++] = data[i]; rgb[j++] = data[i+1]; rgb[j++] = data[i+2]; }
-    var flate = await deflate(rgb);
-    var pw = (w / 300 * 72).toFixed(2), ph = (h / 300 * 72).toFixed(2);
-    var enc = function(s) { var a = new Uint8Array(s.length); for (var k=0;k<s.length;k++) a[k] = s.charCodeAt(k) & 0xff; return a; };
-    var parts = [], offsets = [], pos = 0;
-    function push(x) { var b = (typeof x === 'string') ? enc(x) : x; parts.push(b); pos += b.length; }
-    function obj(n, body) { offsets[n] = pos; push(n + ' 0 obj\\n' + body + '\\nendobj\\n'); }
-
-    push('%PDF-1.4\\n%\\xFF\\xFF\\xFF\\xFF\\n');
-    obj(1, '<< /Type /Catalog /Pages 2 0 R >>');
-    obj(2, '<< /Type /Pages /Kids [3 0 R] /Count 1 >>');
-    obj(3, '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + pw + ' ' + ph + '] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>');
-    offsets[4] = pos;
-    push('4 0 obj\\n<< /Type /XObject /Subtype /Image /Width ' + w + ' /Height ' + h + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /FlateDecode /Length ' + flate.length + ' >>\\nstream\\n');
-    push(flate);
-    push('\\nendstream\\nendobj\\n');
-    var content = 'q ' + pw + ' 0 0 ' + ph + ' 0 0 cm /Im0 Do Q';
-    obj(5, '<< /Length ' + content.length + ' >>\\nstream\\n' + content + '\\nendstream');
-    var xrefPos = pos, n = 6;
-    var xref = 'xref\\n0 ' + n + '\\n0000000000 65535 f \\n';
-    for (var m = 1; m < n; m++) xref += ('0000000000' + offsets[m]).slice(-10) + ' 00000 n \\n';
-    push(xref);
-    push('trailer\\n<< /Size ' + n + ' /Root 1 0 R >>\\nstartxref\\n' + xrefPos + '\\n%%EOF');
-    var totalLen = 0; parts.forEach(function(p) { totalLen += p.length; });
-    var out = new Uint8Array(totalLen), q = 0;
-    parts.forEach(function(p) { out.set(p, q); q += p.length; });
-    return out;
-  }
 
   function downloadBlob(blob, name) {
     var url = URL.createObjectURL(blob);
@@ -1183,13 +1137,22 @@ input[type=range].slider::-moz-range-thumb {
     var original = sub.textContent;
     sub.textContent = '${t.dlRendering}';
     try {
-      var canvas = await renderLabelCanvas();
       var name = fileBase();
       if (fmt === 'png') {
+        // PNG = client-side raster proof
+        var canvas = await renderLabelCanvas();
         await new Promise(function(res) { canvas.toBlob(function(b) { downloadBlob(b, name + '.png'); res(); }, 'image/png'); });
       } else {
-        var pdf = await canvasToPDF(canvas);
-        downloadBlob(new Blob([pdf], { type: 'application/pdf' }), name + '.pdf');
+        // PDF = server-side production file (vector, CMYK, embedded brand fonts)
+        var cfg = {
+          appellation: txt('lbl-appellation'), brand: txt('lbl-brand'), klass: txt('lbl-class'),
+          varietal: txt('lbl-varietal'), vintage: txt('lbl-vintage'),
+          style: currentStyle(), lang: '${lang}',
+          scales: { appellation: scaleOf('appellation'), brand: scaleOf('brand'), class: scaleOf('class'), varietal: scaleOf('varietal'), vintage: scaleOf('vintage') }
+        };
+        var resp = await fetch('/api/label.pdf', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(cfg) });
+        if (!resp.ok) throw new Error('pdf request failed');
+        downloadBlob(await resp.blob(), name + '.pdf');
       }
       closeChooser();
     } catch (e) {

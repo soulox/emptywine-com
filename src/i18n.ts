@@ -169,11 +169,11 @@ const en: Copy = {
   pvCommission: 'Commission This Label',
   pvNoteHtml: '<b>Updates live</b> as you type. Download a print-ready file, or commission us to produce the finished bottle.',
   // download modal
-  dlKicker: 'Design Proof',
+  dlKicker: 'Print File',
   dlTitle: 'Download your label',
-  dlNote: 'A print-ready design proof — 100 × 120 mm with 2.5 mm bleed, crop marks and a 2 mm safe margin, at 300 DPI. The final CMYK / PDF-X file is prepared at production. Choose a format:',
-  dlPngSub: 'PNG · 300 DPI',
-  dlPdfSub: 'PDF · lossless',
+  dlNote: 'Print-ready label at 100 × 120 mm with 2.5 mm bleed and crop marks. The PDF is vector, in CMYK, with your brand fonts embedded; the PNG is a 300 DPI proof image. Choose a format:',
+  dlPngSub: 'PNG · 300 DPI proof',
+  dlPdfSub: 'PDF · vector CMYK',
   dlCommission: 'Prefer we print &amp; deliver it? Commission us →',
   dlRendering: 'rendering…',
   // <head> per page
@@ -293,9 +293,9 @@ const fr: Copy = {
   pvCommission: 'Commander cette étiquette',
   pvNoteHtml: '<b>Mise à jour en direct</b> pendant que vous tapez. Téléchargez un fichier prêt à imprimer, ou confiez-nous la production de la bouteille finale.',
   // download modal
-  dlKicker: 'Épreuve d’impression', dlTitle: 'Téléchargez votre étiquette',
-  dlNote: 'Une épreuve prête pour l’impression — 100 × 120 mm avec 2,5 mm de fond perdu, repères de coupe et marge de sécurité de 2 mm, à 300 DPI. Le fichier final CMJN / PDF-X est préparé à l’impression. Choisissez un format :',
-  dlPngSub: 'PNG · 300 DPI', dlPdfSub: 'PDF · sans perte',
+  dlKicker: 'Fichier d’impression', dlTitle: 'Téléchargez votre étiquette',
+  dlNote: 'Étiquette prête pour l’impression, 100 × 120 mm avec 2,5 mm de fond perdu et repères de coupe. Le PDF est vectoriel, en CMJN, avec vos polices intégrées ; le PNG est une épreuve à 300 DPI. Choisissez un format :',
+  dlPngSub: 'PNG · épreuve 300 DPI', dlPdfSub: 'PDF · vectoriel CMJN',
   dlCommission: 'Vous préférez qu’on l’imprime et la livre ? Commandez →', dlRendering: 'rendu…',
   // <head> design
   designTitle: 'Concevez votre étiquette — emptywine',
