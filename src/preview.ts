@@ -1,8 +1,21 @@
 import { COPY, Lang, headTags, otherLang } from './i18n';
+import { labelStyles, labelMarkup, defaultLabelConfig } from './label';
+import type { LabelConfig } from './labelpdf';
 
-export function renderPreview(lang: Lang): string {
+export interface PreviewOpts {
+  user?: { email: string; emailVerified: boolean } | null;
+  initial?: LabelConfig; // pre-fill (reopen a saved order design)
+  orderNo?: string;      // the order being edited, if any
+}
+
+export function renderPreview(lang: Lang, opts: PreviewOpts = {}): string {
   const t = COPY[lang];
   const alt = lang === 'en' ? '/fr/design' : '/design';
+  const cfg: LabelConfig = opts.initial ?? defaultLabelConfig(lang);
+  const user = opts.user ?? null;
+  const pfx = lang === 'fr' ? '/fr' : '';
+  const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const pctOf = (n: number) => Math.round((n || 1) * 100);
   return `<!DOCTYPE html>
 <html lang="${lang}">
 <head>
@@ -159,32 +172,12 @@ input:focus-visible {
   filter: drop-shadow(0 2px 6px rgba(0,0,0,0.28));
 }
 
-.label-paper {
-  width: 100%;
-  height: 100%;
-  container-type: size;
-  background: linear-gradient(168deg, #faf6ec 0%, #f2e8d5 45%, #e6d8c2 100%);
-  position: relative;
-  overflow: hidden;
-  border-radius: 3px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.4s ease;
-}
+/* Shared label surface (backgrounds, frames, typography) — see src/label.ts,
+   also used by the account order-proof + admin thumbnails so they can't drift. */
+${labelStyles()}
 
-.label-paper::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='t'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23t)' opacity='0.06'/%3E%3C/svg%3E");
-  mix-blend-mode: multiply;
-  pointer-events: none;
-  opacity: 0.4;
-}
-
-/* cylinder curvature: soft edge-shadows + a specular highlight band,
-   so the flat label reads as wrapping the round bottle */
+/* Builder-only cylinder curvature: soft edge-shadows + a specular highlight
+   band, so the flat label reads as wrapping the round bottle. */
 .label-paper::after {
   content: '';
   position: absolute;
@@ -201,115 +194,6 @@ input:focus-visible {
     rgba(0,0,0,0.12) 82%,
     rgba(0,0,0,0.55) 100%);
 }
-
-.label-frame-outer {
-  position: absolute;
-  inset: 7%;
-  border: 1px solid rgba(150,110,25,0.42);
-  pointer-events: none;
-  transition: border-color 0.4s ease;
-}
-
-.label-frame-inner {
-  position: absolute;
-  inset: 10.5%;
-  border: 1px solid rgba(150,110,25,0.16);
-  pointer-events: none;
-  transition: border-color 0.4s ease;
-}
-
-.label-content {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 8% 9%;
-  width: 100%;
-  height: 100%;
-}
-
-.lbl-appellation {
-  font-family: 'Manrope', sans-serif;
-  font-weight: 700;
-  font-size: calc(5.6cqh * var(--scale-appellation));
-  line-height: 1.1;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(60,40,10,0.5);
-  margin-bottom: 5.5cqh;
-}
-
-.lbl-brand {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-style: italic;
-  font-weight: 500;
-  font-size: calc(17cqh * var(--scale-brand));
-  line-height: 1;
-  color: #18110a;
-  margin-bottom: 4cqh;
-  transition: color 0.4s ease;
-}
-
-.lbl-rule {
-  width: 62%;
-  height: 1px;
-  background: linear-gradient(to right, transparent, rgba(130,90,18,0.5), transparent);
-  margin-bottom: 4cqh;
-  transition: background 0.4s ease;
-}
-
-.lbl-class {
-  font-family: 'Manrope', sans-serif;
-  font-weight: 600;
-  font-size: calc(5.2cqh * var(--scale-class));
-  line-height: 1.1;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(60,40,10,0.6);
-  margin-bottom: 3.5cqh;
-}
-
-.lbl-varietal {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-style: italic;
-  font-size: calc(8.5cqh * var(--scale-varietal));
-  line-height: 1.05;
-  color: rgba(60,40,10,0.46);
-  margin-bottom: 4cqh;
-}
-
-.lbl-vintage {
-  font-family: 'Manrope', sans-serif;
-  font-weight: 600;
-  font-size: calc(5.6cqh * var(--scale-vintage));
-  line-height: 1;
-  letter-spacing: 0.22em;
-  color: rgba(80,55,14,0.62);
-}
-
-/* colour theming for label styles applied via JS-friendly classes */
-.label-paper.style-noir { background: linear-gradient(168deg, #17140f 0%, #241f18 100%); }
-.label-paper.style-noir .lbl-brand { color: #d8b25f; }
-.label-paper.style-noir .lbl-appellation,
-.label-paper.style-noir .lbl-class,
-.label-paper.style-noir .lbl-varietal,
-.label-paper.style-noir .lbl-vintage { color: rgba(216,178,95,0.7); }
-.label-paper.style-noir .lbl-rule { background: linear-gradient(to right, transparent, rgba(216,178,95,0.4), transparent); }
-.label-paper.style-noir .label-frame-outer { border-color: rgba(216,178,95,0.35); }
-.label-paper.style-noir .label-frame-inner { border-color: rgba(216,178,95,0.15); }
-
-.label-paper.style-blanc { background: #faf9f7; }
-.label-paper.style-blanc .lbl-brand { color: #1b1512; }
-.label-paper.style-blanc .lbl-appellation,
-.label-paper.style-blanc .lbl-class,
-.label-paper.style-blanc .lbl-varietal,
-.label-paper.style-blanc .lbl-vintage { color: rgba(27,21,18,0.5); }
-.label-paper.style-blanc .lbl-rule { background: linear-gradient(to right, transparent, rgba(27,21,18,0.22), transparent); }
-.label-paper.style-blanc .label-frame-outer { border-color: rgba(27,21,18,0.2); }
-.label-paper.style-blanc .label-frame-inner { border-color: rgba(27,21,18,0.09); }
 
 /* ── EDITOR PANEL ── */
 .editor-panel {
@@ -530,6 +414,33 @@ input[type=range].slider::-moz-range-thumb {
 .btn-order:hover { background: #423d36; transform: translateY(-2px); box-shadow: 0 12px 30px rgba(42,39,35,0.14); }
 .btn-order:active { transform: translateY(0) scale(0.98); box-shadow: 0 4px 12px rgba(42,39,35,0.12); }
 
+.footer-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.footer-actions .btn-order { flex: 1 1 auto; }
+.btn-ghost {
+  flex: 0 0 auto;
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0 20px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.btn-ghost:hover { border-color: var(--bronze); background: var(--bg-2); }
+.edit-banner { font-size: 0.85rem; color: var(--bronze); margin-bottom: 12px; }
+.order-form { display: flex; flex-direction: column; gap: 8px; text-align: left; margin-top: 8px; }
+.order-form label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--faint); }
+.order-form input, .order-form textarea {
+  font: inherit; color: var(--ink); background: #fff;
+  border: 1px solid var(--border); border-radius: 9px; padding: 10px 12px; width: 100%; resize: vertical;
+}
+.order-form input:focus, .order-form textarea:focus { outline: 2px solid var(--bronze); outline-offset: 1px; border-color: var(--bronze); }
+.order-form .btn-order { margin-top: 6px; }
+.o-error { color: #a3352a; font-size: 0.85rem; margin: 0; }
+
 .preview-note {
   font-size: 0.82rem;
   font-weight: 300;
@@ -712,18 +623,7 @@ input[type=range].slider::-moz-range-thumb {
 
       <!-- Label overlay — sits on the bottle body -->
       <div class="label-overlay" id="label-overlay">
-        <div class="label-paper" id="label-paper">
-          <div class="label-frame-outer"></div>
-          <div class="label-frame-inner"></div>
-          <div class="label-content">
-            <span class="lbl-appellation" id="lbl-appellation">Appellation Contrôlée</span>
-            <em class="lbl-brand" id="lbl-brand">emptywine</em>
-            <div class="lbl-rule"></div>
-            <span class="lbl-class" id="lbl-class">Grand Réserve</span>
-            <span class="lbl-varietal" id="lbl-varietal">${lang === 'fr' ? 'Bourgogne · Pinot Noir' : 'Burgundy · Pinot Noir'}</span>
-            <span class="lbl-vintage" id="lbl-vintage">MMXXV</span>
-          </div>
-        </div>
+        ${labelMarkup(cfg, { ids: true })}
       </div>
     </div>
   </div>
@@ -739,15 +639,15 @@ input[type=range].slider::-moz-range-thumb {
     <div class="editor-body">
       <div class="field">
         <label for="f-brand">${t.pvBrand}</label>
-        <input id="f-brand" type="text" placeholder="${t.pvBrandPh}" />
+        <input id="f-brand" type="text" placeholder="${t.pvBrandPh}" value="${opts.initial ? esc(cfg.brand) : ''}" />
       </div>
       <div class="field">
         <label for="f-collection">${t.pvCollection}</label>
-        <input id="f-collection" type="text" placeholder="${t.pvCollectionPh}" />
+        <input id="f-collection" type="text" placeholder="${t.pvCollectionPh}" value="${opts.initial ? esc(cfg.appellation) : ''}" />
       </div>
       <div class="field">
         <label for="f-varietal">${t.pvVarietal}</label>
-        <input id="f-varietal" type="text" placeholder="${t.pvVarietalPh}" />
+        <input id="f-varietal" type="text" placeholder="${t.pvVarietalPh}" value="${opts.initial ? esc(cfg.varietal) : ''}" />
       </div>
       <div class="field">
         <div class="field-row">
@@ -762,9 +662,9 @@ input[type=range].slider::-moz-range-thumb {
       <div class="field">
         <label>${t.pvStyle}</label>
         <div class="style-chips" id="style-chips">
-          <button type="button" class="style-chip active" data-style="cream" aria-pressed="true">${t.pvStyleCream}</button>
-          <button type="button" class="style-chip" data-style="noir" aria-pressed="false">${t.pvStyleNoir}</button>
-          <button type="button" class="style-chip" data-style="blanc" aria-pressed="false">${t.pvStyleBlanc}</button>
+          <button type="button" class="style-chip${cfg.style === 'cream' ? ' active' : ''}" data-style="cream" aria-pressed="${cfg.style === 'cream'}">${t.pvStyleCream}</button>
+          <button type="button" class="style-chip${cfg.style === 'noir' ? ' active' : ''}" data-style="noir" aria-pressed="${cfg.style === 'noir'}">${t.pvStyleNoir}</button>
+          <button type="button" class="style-chip${cfg.style === 'blanc' ? ' active' : ''}" data-style="blanc" aria-pressed="${cfg.style === 'blanc'}">${t.pvStyleBlanc}</button>
         </div>
       </div>
 
@@ -773,38 +673,63 @@ input[type=range].slider::-moz-range-thumb {
         <div class="size-group" id="size-group">
           <div class="size-row">
             <span>${t.pvSizeBrand}</span>
-            <input class="slider" type="range" min="55" max="150" value="100" data-target="brand" aria-label="${t.pvSizeBrand}" />
-            <span class="field-val" data-val="brand">100%</span>
+            <input class="slider" type="range" min="55" max="150" value="${pctOf(cfg.scales.brand)}" data-target="brand" aria-label="${t.pvSizeBrand}" />
+            <span class="field-val" data-val="brand">${pctOf(cfg.scales.brand)}%</span>
           </div>
           <div class="size-row">
             <span>${t.pvSizeCollection}</span>
-            <input class="slider" type="range" min="55" max="150" value="100" data-target="appellation" aria-label="${t.pvSizeCollection}" />
-            <span class="field-val" data-val="appellation">100%</span>
+            <input class="slider" type="range" min="55" max="150" value="${pctOf(cfg.scales.appellation)}" data-target="appellation" aria-label="${t.pvSizeCollection}" />
+            <span class="field-val" data-val="appellation">${pctOf(cfg.scales.appellation)}%</span>
           </div>
           <div class="size-row">
             <span>${t.pvSizeClass}</span>
-            <input class="slider" type="range" min="55" max="150" value="100" data-target="class" aria-label="${t.pvSizeClass}" />
-            <span class="field-val" data-val="class">100%</span>
+            <input class="slider" type="range" min="55" max="150" value="${pctOf(cfg.scales.class)}" data-target="class" aria-label="${t.pvSizeClass}" />
+            <span class="field-val" data-val="class">${pctOf(cfg.scales.class)}%</span>
           </div>
           <div class="size-row">
             <span>${t.pvSizeVarietal}</span>
-            <input class="slider" type="range" min="55" max="150" value="100" data-target="varietal" aria-label="${t.pvSizeVarietal}" />
-            <span class="field-val" data-val="varietal">100%</span>
+            <input class="slider" type="range" min="55" max="150" value="${pctOf(cfg.scales.varietal)}" data-target="varietal" aria-label="${t.pvSizeVarietal}" />
+            <span class="field-val" data-val="varietal">${pctOf(cfg.scales.varietal)}%</span>
           </div>
           <div class="size-row">
             <span>${t.pvSizeVintage}</span>
-            <input class="slider" type="range" min="55" max="150" value="100" data-target="vintage" aria-label="${t.pvSizeVintage}" />
-            <span class="field-val" data-val="vintage">100%</span>
+            <input class="slider" type="range" min="55" max="150" value="${pctOf(cfg.scales.vintage)}" data-target="vintage" aria-label="${t.pvSizeVintage}" />
+            <span class="field-val" data-val="vintage">${pctOf(cfg.scales.vintage)}%</span>
           </div>
         </div>
       </div>
     </div>
 
     <div class="editor-footer">
-      <button type="button" class="btn-order" id="btn-commission">${t.pvCommission}</button>
+      ${opts.orderNo ? `<p class="edit-banner">${lang === 'fr' ? 'Modification de la commande' : 'Editing order'} <strong>${esc(opts.orderNo)}</strong></p>` : ''}
+      <div class="footer-actions">
+        <button type="button" class="btn-order" id="btn-submit-order">${lang === 'fr' ? 'Passer commande' : 'Place an order'}</button>
+        <button type="button" class="btn-ghost" id="btn-commission">${lang === 'fr' ? 'Télécharger l’épreuve' : 'Download proof'}</button>
+      </div>
+      <p class="preview-note">${user
+        ? `${esc(user.email)} · <a href="${pfx}/account">${lang === 'fr' ? 'Mes commandes' : 'My orders'}</a>`
+        : `<a href="${pfx}/login?next=${encodeURIComponent(pfx + '/design')}">${lang === 'fr' ? 'Connectez-vous' : 'Sign in'}</a> ${lang === 'fr' ? 'pour passer commande.' : 'to place an order.'}`}</p>
       <p class="preview-note">${t.pvNoteHtml}</p>
     </div>
 
+  </div>
+</div>
+
+<!-- Order modal -->
+<div class="dl-overlay" id="order-overlay" hidden>
+  <div class="dl-card" role="dialog" aria-modal="true" aria-labelledby="order-title">
+    <button type="button" class="dl-close" id="order-close" aria-label="${lang === 'fr' ? 'Fermer' : 'Close'}">×</button>
+    <span class="dl-kicker">${lang === 'fr' ? 'Commande' : 'Order'}</span>
+    <h2 class="dl-title" id="order-title">${lang === 'fr' ? 'Passer votre commande' : 'Place your order'}</h2>
+    <p class="dl-note">${lang === 'fr' ? 'Indiquez une quantité et toute précision utile. Nous confirmerons les détails et le tarif par e-mail.' : 'Tell us a quantity and any details. We’ll confirm specifics and pricing by email.'}</p>
+    <div class="order-form">
+      <label for="o-qty">${lang === 'fr' ? 'Quantité (bouteilles)' : 'Quantity (bottles)'}</label>
+      <input id="o-qty" type="number" min="1" step="1" inputmode="numeric" placeholder="500" />
+      <label for="o-notes">${lang === 'fr' ? 'Précisions (facultatif)' : 'Notes (optional)'}</label>
+      <textarea id="o-notes" rows="3" placeholder="${lang === 'fr' ? 'Livraison, date souhaitée, questions…' : 'Delivery, target date, questions…'}"></textarea>
+      <p class="o-error" id="o-error" hidden></p>
+      <button type="button" class="btn-order" id="o-submit">${lang === 'fr' ? 'Envoyer la commande' : 'Submit order'}</button>
+    </div>
   </div>
 </div>
 
@@ -832,6 +757,14 @@ input[type=range].slider::-moz-range-thumb {
 <script>
 (function() {
   'use strict';
+
+  var EW = {
+    user: ${user ? 'true' : 'false'},
+    verified: ${user && user.emailVerified ? 'true' : 'false'},
+    hasInitial: ${opts.initial ? 'true' : 'false'},
+    loginUrl: ${JSON.stringify(pfx + '/login?next=' + encodeURIComponent(pfx + '/design'))},
+    lang: '${lang}'
+  };
 
   function toRoman(year) {
     if (!year || year.length !== 4) return year || 'MMXXV';
@@ -1144,13 +1077,7 @@ input[type=range].slider::-moz-range-thumb {
         await new Promise(function(res) { canvas.toBlob(function(b) { downloadBlob(b, name + '.png'); res(); }, 'image/png'); });
       } else {
         // PDF = server-side production file (vector, CMYK, embedded brand fonts)
-        var cfg = {
-          appellation: txt('lbl-appellation'), brand: txt('lbl-brand'), klass: txt('lbl-class'),
-          varietal: txt('lbl-varietal'), vintage: txt('lbl-vintage'),
-          style: currentStyle(), lang: '${lang}',
-          scales: { appellation: scaleOf('appellation'), brand: scaleOf('brand'), class: scaleOf('class'), varietal: scaleOf('varietal'), vintage: scaleOf('vintage') }
-        };
-        var resp = await fetch('/api/label.pdf', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(cfg) });
+        var resp = await fetch('/api/label.pdf', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(buildCfg()) });
         if (!resp.ok) throw new Error('pdf request failed');
         downloadBlob(await resp.blob(), name + '.pdf');
       }
@@ -1166,6 +1093,99 @@ input[type=range].slider::-moz-range-thumb {
 
   pngBtn.addEventListener('click', function() { exportLabel('png', pngBtn); });
   pdfBtn.addEventListener('click', function() { exportLabel('pdf', pdfBtn); });
+
+  // ── Orders ──────────────────────────────────────────────────────────
+  function buildCfg() {
+    return {
+      appellation: txt('lbl-appellation'), brand: txt('lbl-brand'), klass: txt('lbl-class'),
+      varietal: txt('lbl-varietal'), vintage: txt('lbl-vintage'),
+      style: currentStyle(), lang: EW.lang,
+      scales: { appellation: scaleOf('appellation'), brand: scaleOf('brand'), class: scaleOf('class'), varietal: scaleOf('varietal'), vintage: scaleOf('vintage') }
+    };
+  }
+
+  // Sync --scale-* from the (possibly pre-filled) sliders on load, so a reopened
+  // design renders at its saved sizes without waiting for a slider event.
+  document.querySelectorAll('#size-group .slider').forEach(function(sl) {
+    root.style.setProperty('--scale-' + sl.getAttribute('data-target'), (parseInt(sl.value, 10) / 100).toString());
+  });
+
+  // Apply a saved design object into the form + label (used when restoring a
+  // design stashed before the "sign in to order" redirect).
+  function applyCfg(cfg) {
+    if (!cfg) return;
+    document.getElementById('f-brand').value = (cfg.brand && cfg.brand !== 'emptywine') ? cfg.brand : '';
+    if (cfg.appellation) document.getElementById('f-collection').value = cfg.appellation;
+    if (cfg.varietal) document.getElementById('f-varietal').value = cfg.varietal;
+    var s = cfg.style || 'cream';
+    document.querySelectorAll('.style-chip').forEach(function(c) {
+      var on = c.getAttribute('data-style') === s;
+      c.classList.toggle('active', on); c.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    paper.classList.remove('style-noir', 'style-blanc');
+    if (s === 'noir') paper.classList.add('style-noir'); else if (s === 'blanc') paper.classList.add('style-blanc');
+    var sc = cfg.scales || {};
+    ['brand', 'appellation', 'class', 'varietal', 'vintage'].forEach(function(k) {
+      var pct = Math.round((sc[k] || 1) * 100);
+      var sl = document.querySelector('#size-group .slider[data-target="' + k + '"]');
+      var vEl = document.querySelector('#size-group .field-val[data-val="' + k + '"]');
+      if (sl) sl.value = pct;
+      if (vEl) vEl.textContent = pct + '%';
+      root.style.setProperty('--scale-' + k, (pct / 100).toString());
+    });
+    updateLabel();
+    if (cfg.vintage) {
+      document.getElementById('lbl-vintage').textContent = cfg.vintage;
+      if (/^[0-9]{4}$/.test(cfg.vintage)) document.getElementById('f-vintage').value = cfg.vintage;
+    }
+  }
+
+  try {
+    if (!EW.hasInitial) {
+      var pend = localStorage.getItem('ew_pending_design');
+      if (pend) { applyCfg(JSON.parse(pend)); localStorage.removeItem('ew_pending_design'); }
+    }
+  } catch (e) {}
+
+  var orderOverlay = document.getElementById('order-overlay');
+  var oError = document.getElementById('o-error');
+  function openOrder() { oError.hidden = true; orderOverlay.hidden = false; }
+  function closeOrder() { orderOverlay.hidden = true; }
+
+  document.getElementById('btn-submit-order').addEventListener('click', function() {
+    if (!EW.user) {
+      try { localStorage.setItem('ew_pending_design', JSON.stringify(buildCfg())); } catch (e) {}
+      window.location.href = EW.loginUrl;
+      return;
+    }
+    openOrder();
+  });
+  document.getElementById('order-close').addEventListener('click', closeOrder);
+  orderOverlay.addEventListener('click', function(e) { if (e.target === orderOverlay) closeOrder(); });
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && !orderOverlay.hidden) closeOrder(); });
+
+  document.getElementById('o-submit').addEventListener('click', async function() {
+    var btn = document.getElementById('o-submit');
+    btn.disabled = true; oError.hidden = true;
+    var original = btn.textContent; btn.textContent = '${lang === 'fr' ? 'Envoi…' : 'Sending…'}';
+    try {
+      var qty = parseInt(document.getElementById('o-qty').value, 10);
+      var notes = document.getElementById('o-notes').value;
+      var resp = await fetch('/api/order', {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ design: buildCfg(), quantity: isNaN(qty) ? 0 : qty, notes: notes })
+      });
+      var data = await resp.json().catch(function() { return {}; });
+      if (resp.ok && data.redirect) { window.location.href = data.redirect; return; }
+      if (resp.status === 401 && data.login) { window.location.href = data.login; return; }
+      oError.textContent = data.message || '${lang === 'fr' ? 'Échec de la commande — réessayez.' : 'Order failed — please try again.'}';
+      oError.hidden = false;
+    } catch (e) {
+      oError.textContent = '${lang === 'fr' ? 'Échec de la commande — réessayez.' : 'Order failed — please try again.'}';
+      oError.hidden = false;
+    }
+    btn.textContent = original; btn.disabled = false;
+  });
 })();
 </script>
 </body>

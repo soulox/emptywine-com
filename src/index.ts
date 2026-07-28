@@ -1,7 +1,10 @@
 import { renderLanding } from './landing';
 import { renderPreview } from './preview';
 import { OG_IMAGE_B64 } from './og';
-import { renderLabelPdf, LabelConfig } from './labelpdf';
+import { renderLabelPdf } from './labelpdf';
+import { accountRouter, loadOrderDesign } from './account';
+import { adminRouter } from './admin';
+import { currentUser, parseLabelConfig } from './auth';
 
 let ogImageBytes: Uint8Array | null = null;
 function getOgImage(): Uint8Array {
@@ -97,16 +100,19 @@ export default {
       });
     }
 
-    // GET /design → label builder (English); /fr/design → French
-    if (method === 'GET' && pathname === '/design') {
-      return new Response(renderPreview('en'), {
-        headers: { 'content-type': 'text/html;charset=UTF-8' },
-      });
-    }
-    if (method === 'GET' && pathname === '/fr/design') {
-      return new Response(renderPreview('fr'), {
-        headers: { 'content-type': 'text/html;charset=UTF-8' },
-      });
+    // GET /design → label builder (English); /fr/design → French.
+    // Optionally logged-in (enables order submission) and pre-fillable via
+    // ?order={no} (reopen a saved design — ownership-checked in loadOrderDesign).
+    if (method === 'GET' && (pathname === '/design' || pathname === '/fr/design')) {
+      const lang = pathname.startsWith('/fr') ? 'fr' : 'en';
+      const user = await currentUser(request, env);
+      const orderNo = url.searchParams.get('order');
+      const order = orderNo ? await loadOrderDesign(request, env, orderNo) : null;
+      return new Response(renderPreview(lang, {
+        user: user ? { email: user.email, emailVerified: user.emailVerified } : null,
+        initial: order ? order.design : undefined,
+        orderNo: order ? order.orderNo : undefined,
+      }), { headers: { 'content-type': 'text/html;charset=UTF-8' } });
     }
 
     // GET /robots.txt
@@ -254,29 +260,20 @@ export default {
     if (method === 'POST' && pathname === '/api/label.pdf') {
       let body: Record<string, unknown>;
       try { body = await request.json(); } catch { return new Response('invalid JSON', { status: 400 }); }
-      const str = (v: unknown, max: number) => String(v ?? '').replace(/[\r\n]+/g, ' ').slice(0, max).trim();
-      const clamp = (v: unknown) => { const n = Number(v); return Number.isFinite(n) ? Math.min(2, Math.max(0.4, n)) : 1; };
-      const style = (['cream', 'noir', 'blanc'] as const).find((s) => s === body.style) ?? 'cream';
-      const lang: 'en' | 'fr' = body.lang === 'fr' ? 'fr' : 'en';
-      const sc = (body.scales ?? {}) as Record<string, unknown>;
-      const cfg: LabelConfig = {
-        appellation: str(body.appellation, 60) || 'Appellation Contrôlée',
-        brand: str(body.brand, 60) || 'emptywine',
-        klass: str(body.klass, 40) || 'Grand Réserve',
-        varietal: str(body.varietal, 60) || (lang === 'fr' ? 'Bourgogne · Pinot Noir' : 'Burgundy · Pinot Noir'),
-        vintage: str(body.vintage, 12) || 'MMXXV',
-        style, lang,
-        scales: {
-          appellation: clamp(sc.appellation), brand: clamp(sc.brand), class: clamp(sc.class),
-          varietal: clamp(sc.varietal), vintage: clamp(sc.vintage),
-        },
-      };
+      const cfg = parseLabelConfig(body);
       const pdf = await renderLabelPdf(cfg);
       const fname = (cfg.brand.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'label') + '-label-proof.pdf';
       return new Response(pdf, {
         headers: { 'content-type': 'application/pdf', 'content-disposition': `attachment; filename="${fname}"` },
       });
     }
+
+    // Customer accounts + orders, then business admin. Each returns null when
+    // the request is not one of its routes.
+    const accountResp = await accountRouter(request, env, ctx);
+    if (accountResp) return accountResp;
+    const adminResp = await adminRouter(request, env, ctx);
+    if (adminResp) return adminResp;
 
     return new Response('Not Found', { status: 404 });
   },
