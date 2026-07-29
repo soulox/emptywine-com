@@ -3,6 +3,13 @@
   "main": "src/index.ts",
   "name": "emptywine-com",
   "upload_source_maps": true,
+  "vars": {
+    "SMTP_HOST": "mail02.outsourceis.com",
+    "SMTP_PORT": "465",
+    "SMTP_SECURITY": "tls",
+    "SMTP_USER": "no-reply@emptywine.com",
+    "SMTP_FROM": "no-reply@emptywine.com"
+  },
   "ai": {
     "binding": "AI"
   },

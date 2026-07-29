@@ -10,6 +10,8 @@ export type Secrets = {
   ADMIN_TOKEN?: string; SLACK_WEBHOOK_URL?: string;
   // SMTP submission (SmarterMail) for transactional email
   SMTP_HOST?: string; SMTP_PORT?: string; SMTP_USER?: string; SMTP_PASSWORD?: string; SMTP_FROM?: string;
+  // 'tls' (implicit, :465) | 'starttls' (:587) | 'none' (plaintext); default inferred from port
+  SMTP_SECURITY?: string;
 };
 export function secrets(env: Env): Secrets { return env as unknown as Secrets; }
 

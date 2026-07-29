@@ -39,13 +39,21 @@ function b64wrap(str: string): string { const raw = b64utf8(str); const lines: s
 // RFC 2047 encoded-word for non-ASCII header values (e.g. accented subjects)
 function encWord(s: string): string { return /^[\x00-\x7F]*$/.test(s) ? s : '=?UTF-8?B?' + b64utf8(s) + '?='; }
 
-interface SmtpConfig { host: string; port: number; user: string; pass: string; from: string; }
+type SmtpMode = 'tls' | 'starttls' | 'none';
+interface SmtpConfig { host: string; port: number; user: string; pass: string; from: string; mode: SmtpMode; }
 function smtpConfig(env: Env): SmtpConfig | null {
   const s = secrets(env);
   if (!s.SMTP_HOST || !s.SMTP_USER || !s.SMTP_PASSWORD) return null;
+  const port = parseInt(s.SMTP_PORT || '587', 10);
+  const sec = (s.SMTP_SECURITY || '').trim().toLowerCase();
+  let mode: SmtpMode;
+  if (sec === 'tls' || sec === 'ssl') mode = 'tls';
+  else if (sec === 'none' || sec === 'off' || sec === 'plain') mode = 'none';
+  else if (sec === 'starttls') mode = 'starttls';
+  else mode = port === 465 ? 'tls' : 'starttls'; // infer from port
   return {
-    host: s.SMTP_HOST, port: parseInt(s.SMTP_PORT || '587', 10),
-    user: s.SMTP_USER, pass: s.SMTP_PASSWORD, from: s.SMTP_FROM || s.SMTP_USER,
+    host: s.SMTP_HOST.trim(), port,
+    user: s.SMTP_USER.trim(), pass: s.SMTP_PASSWORD, from: (s.SMTP_FROM || s.SMTP_USER).trim(), mode,
   };
 }
 
@@ -83,7 +91,8 @@ function withTimeout<X>(p: Promise<X>, ms: number, label: string): Promise<X> {
 
 async function smtpSend(cfg: SmtpConfig, msg: { to: string; subject: string; html: string }): Promise<void> {
   const domain = cfg.from.split('@')[1] || 'emptywine.com';
-  const socket = connect({ hostname: cfg.host, port: cfg.port }, { secureTransport: 'starttls', allowHalfOpen: false });
+  const secureTransport = cfg.mode === 'tls' ? 'on' : cfg.mode === 'starttls' ? 'starttls' : 'off';
+  const socket = connect({ hostname: cfg.host, port: cfg.port }, { secureTransport, allowHalfOpen: false });
   let conn = new SmtpConn(socket);
   const expect = async (want: number, step: string) => {
     const r = await withTimeout(conn.reply(), 15000, step);
@@ -93,11 +102,12 @@ async function smtpSend(cfg: SmtpConfig, msg: { to: string; subject: string; htm
   try {
     await expect(220, 'greeting');
     await conn.write(`EHLO ${domain}\r\n`); await expect(250, 'ehlo');
-    await conn.write('STARTTLS\r\n'); await expect(220, 'starttls');
-    conn.release();
-    const secure = socket.startTls();
-    conn = new SmtpConn(secure);
-    await conn.write(`EHLO ${domain}\r\n`); await expect(250, 'ehlo-tls');
+    if (cfg.mode === 'starttls') {
+      await conn.write('STARTTLS\r\n'); await expect(220, 'starttls');
+      conn.release();
+      conn = new SmtpConn(socket.startTls());
+      await conn.write(`EHLO ${domain}\r\n`); await expect(250, 'ehlo-tls');
+    }
     await conn.write('AUTH LOGIN\r\n'); await expect(334, 'auth');
     await conn.write(b64utf8(cfg.user) + '\r\n'); await expect(334, 'auth-user');
     await conn.write(b64utf8(cfg.pass) + '\r\n'); await expect(235, 'auth-pass');
@@ -131,6 +141,7 @@ async function deliver(env: Env, to: string, subject: string, html: string, devL
   }
   try {
     await withTimeout(smtpSend(cfg, { to, subject, html }), 20000, 'smtp-send');
+    console.log(`[email] sent ok → ${to} (${cfg.mode})`);
   } catch (e) {
     // swallow — auth/order flow already succeeded; log for diagnosis
     console.log('[email] send failed:', (e as Error).message);
