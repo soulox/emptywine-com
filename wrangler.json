@@ -13,7 +13,7 @@
     {
       "binding": "DB",
       "database_name": "emptywine",
-      "database_id": "REPLACE_WITH_REAL_ID_FROM_wrangler_d1_create",
+      "database_id": "112a847d-c7cd-48a7-8f1f-71b5594adad7",
       "migrations_dir": "migrations"
     }
   ],
