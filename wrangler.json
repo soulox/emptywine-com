@@ -8,7 +8,8 @@
     "SMTP_PORT": "465",
     "SMTP_SECURITY": "tls",
     "SMTP_USER": "no-reply@emptywine.com",
-    "SMTP_FROM": "no-reply@emptywine.com"
+    "SMTP_FROM": "no-reply@emptywine.com",
+    "PUBLIC_ORIGIN": "https://emptywine.com"
   },
   "ai": {
     "binding": "AI"

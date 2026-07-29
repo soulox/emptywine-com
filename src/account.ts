@@ -316,7 +316,7 @@ export async function accountRouter(request: Request, env: Env, ctx: ExecutionCo
     try { user = await createUser(env, { email, passwordHash: await hashPassword(password), name, company, phone }); }
     catch { return html(signupPage(lg, AC(lg).emailTaken, 'error'), 409); }
     const vtoken = await issueToken(env, 'verify', user.id);
-    ctx.waitUntil(sendVerifyEmail(env, url.origin, email, lg, vtoken));
+    ctx.waitUntil(sendVerifyEmail(env, secrets(env).PUBLIC_ORIGIN || url.origin, email, lg, vtoken));
     const token = await createSession(env, user.id);
     return redirect(next, sessionCookie(token));
   }
@@ -344,7 +344,7 @@ export async function accountRouter(request: Request, env: Env, ctx: ExecutionCo
     const lg: Lang = String(f.get('lang')) === 'fr' ? 'fr' : 'en';
     const email = String(f.get('email') || '').trim().toLowerCase();
     const user = emailRe.test(email) ? await getUserByEmail(env, email) : null;
-    if (user) { const rtoken = await issueToken(env, 'reset', user.id); ctx.waitUntil(sendResetEmail(env, url.origin, email, lg, rtoken)); }
+    if (user) { const rtoken = await issueToken(env, 'reset', user.id); ctx.waitUntil(sendResetEmail(env, secrets(env).PUBLIC_ORIGIN || url.origin, email, lg, rtoken)); }
     return html(forgotPage(lg, AC(lg).resetSent, 'ok')); // never reveal existence
   }
   if (method === 'POST' && url.pathname === '/api/reset') {

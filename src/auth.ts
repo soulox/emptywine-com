@@ -12,6 +12,8 @@ export type Secrets = {
   SMTP_HOST?: string; SMTP_PORT?: string; SMTP_USER?: string; SMTP_PASSWORD?: string; SMTP_FROM?: string;
   // 'tls' (implicit, :465) | 'starttls' (:587) | 'none' (plaintext); default inferred from port
   SMTP_SECURITY?: string;
+  // canonical base URL for links in emails (falls back to the request origin)
+  PUBLIC_ORIGIN?: string;
 };
 export function secrets(env: Env): Secrets { return env as unknown as Secrets; }
 
