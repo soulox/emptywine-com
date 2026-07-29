@@ -208,3 +208,4 @@ skills-lock.json
 
 # subagent-driven-development scratch (ledger, briefs, diffs)
 .superpowers/
+*.dev.vars

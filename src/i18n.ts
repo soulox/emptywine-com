@@ -56,6 +56,21 @@ export interface Copy {
   // <head> per page
   landingTitle: string; landingDesc: string; landingOgTitle: string; landingOgDesc: string;
   designTitle: string; designDesc: string; designOgTitle: string; designOgDesc: string;
+  // account + orders (private, noindex pages)
+  account: AccountCopy;
+}
+
+export interface AccountCopy {
+  loginTitle: string; signupTitle: string; forgotTitle: string; resetTitle: string; accountTitle: string;
+  email: string; password: string; name: string; company: string; phone: string; optional: string;
+  signIn: string; signUp: string; signOut: string; createAccount: string; haveAccount: string; noAccount: string;
+  forgotLink: string; forgotIntro: string; sendReset: string; resetIntro: string; newPassword: string; updatePassword: string;
+  verifyBanner: string; verifiedOk: string; verifyExpired: string; resetSent: string; resetDone: string; resetExpired: string;
+  badLogin: string; emailTaken: string; weakPassword: string; invalid: string; rateLimited: string;
+  myOrders: string; noOrders: string; startDesign: string; orderNo: string; placed: string; status: string; quantity: string;
+  statusLabels: { received: string; in_production: string; shipped: string; cancelled: string };
+  viewOrder: string; backToOrders: string; downloadPdf: string; reopenEdit: string; orderNotes: string;
+  orderPlaced: string; orderThanks: string; profile: string; bottles: string;
 }
 
 const en: Copy = {
@@ -185,6 +200,21 @@ const en: Copy = {
   designDesc: 'Preview a bespoke wine label for your brand, live. Type your name, pick a style, and see it on the bottle.',
   designOgTitle: 'Design Your Label — emptywine',
   designOgDesc: 'Preview a bespoke wine label for your brand, live. Type your name, pick a style, and see it on the bottle.',
+  account: {
+    loginTitle: 'Sign in', signupTitle: 'Create your account', forgotTitle: 'Reset your password', resetTitle: 'Choose a new password', accountTitle: 'Your account',
+    email: 'Email', password: 'Password', name: 'Name', company: 'Company', phone: 'Phone', optional: 'optional',
+    signIn: 'Sign in', signUp: 'Create account', signOut: 'Sign out', createAccount: 'Create account', haveAccount: 'Already have an account?', noAccount: 'New to emptywine?',
+    forgotLink: 'Forgot your password?', forgotIntro: 'Enter your email and we’ll send you a link to reset your password.', sendReset: 'Send reset link',
+    resetIntro: 'Choose a new password for your account.', newPassword: 'New password', updatePassword: 'Update password',
+    verifyBanner: 'Please confirm your email address — we sent you a link. You’ll need a confirmed email to place an order.',
+    verifiedOk: 'Your email is confirmed. Welcome to emptywine.', verifyExpired: 'That confirmation link is invalid or has expired.',
+    resetSent: 'If that email has an account, a reset link is on its way.', resetDone: 'Your password has been updated — you can sign in.', resetExpired: 'That reset link is invalid or has expired.',
+    badLogin: 'Email or password is incorrect.', emailTaken: 'An account with that email already exists.', weakPassword: 'Password must be at least 8 characters.', invalid: 'Please check the form and try again.', rateLimited: 'Too many attempts. Please try again later.',
+    myOrders: 'My orders', noOrders: 'You have no orders yet.', startDesign: 'Design a label', orderNo: 'Order', placed: 'Placed', status: 'Status', quantity: 'Quantity',
+    statusLabels: { received: 'Received', in_production: 'In production', shipped: 'Shipped', cancelled: 'Cancelled' },
+    viewOrder: 'View order', backToOrders: 'Back to orders', downloadPdf: 'Download print PDF', reopenEdit: 'Reopen & edit design', orderNotes: 'Notes',
+    orderPlaced: 'Order received', orderThanks: 'Thank you — we’ve received your design and will be in touch shortly to confirm details and pricing.', profile: 'Profile', bottles: 'bottles',
+  },
 };
 
 const fr: Copy = {
@@ -302,6 +332,21 @@ const fr: Copy = {
   designDesc: 'Prévisualisez une étiquette de vin sur mesure pour votre marque, en direct. Saisissez votre nom, choisissez un style et voyez-la sur la bouteille.',
   designOgTitle: 'Concevez votre étiquette — emptywine',
   designOgDesc: 'Prévisualisez une étiquette de vin sur mesure pour votre marque, en direct — saisissez votre nom, choisissez un style, téléchargez-la prête à imprimer.',
+  account: {
+    loginTitle: 'Connexion', signupTitle: 'Créez votre compte', forgotTitle: 'Réinitialiser le mot de passe', resetTitle: 'Choisissez un nouveau mot de passe', accountTitle: 'Votre compte',
+    email: 'E-mail', password: 'Mot de passe', name: 'Nom', company: 'Société', phone: 'Téléphone', optional: 'facultatif',
+    signIn: 'Se connecter', signUp: 'Créer un compte', signOut: 'Se déconnecter', createAccount: 'Créer un compte', haveAccount: 'Vous avez déjà un compte ?', noAccount: 'Nouveau chez emptywine ?',
+    forgotLink: 'Mot de passe oublié ?', forgotIntro: 'Saisissez votre e-mail et nous vous enverrons un lien de réinitialisation.', sendReset: 'Envoyer le lien',
+    resetIntro: 'Choisissez un nouveau mot de passe pour votre compte.', newPassword: 'Nouveau mot de passe', updatePassword: 'Mettre à jour',
+    verifyBanner: 'Merci de confirmer votre adresse e-mail — nous vous avons envoyé un lien. Une adresse confirmée est nécessaire pour passer commande.',
+    verifiedOk: 'Votre e-mail est confirmé. Bienvenue chez emptywine.', verifyExpired: 'Ce lien de confirmation est invalide ou a expiré.',
+    resetSent: 'Si un compte existe pour cet e-mail, un lien de réinitialisation est en route.', resetDone: 'Votre mot de passe a été mis à jour — vous pouvez vous connecter.', resetExpired: 'Ce lien de réinitialisation est invalide ou a expiré.',
+    badLogin: 'E-mail ou mot de passe incorrect.', emailTaken: 'Un compte existe déjà avec cet e-mail.', weakPassword: 'Le mot de passe doit comporter au moins 8 caractères.', invalid: 'Veuillez vérifier le formulaire et réessayer.', rateLimited: 'Trop de tentatives. Réessayez plus tard.',
+    myOrders: 'Mes commandes', noOrders: 'Vous n’avez pas encore de commande.', startDesign: 'Concevoir une étiquette', orderNo: 'Commande', placed: 'Passée le', status: 'Statut', quantity: 'Quantité',
+    statusLabels: { received: 'Reçue', in_production: 'En production', shipped: 'Expédiée', cancelled: 'Annulée' },
+    viewOrder: 'Voir la commande', backToOrders: 'Retour aux commandes', downloadPdf: 'Télécharger le PDF d’impression', reopenEdit: 'Rouvrir et modifier', orderNotes: 'Notes',
+    orderPlaced: 'Commande reçue', orderThanks: 'Merci — nous avons bien reçu votre design et reviendrons vers vous très vite pour confirmer les détails et le tarif.', profile: 'Profil', bottles: 'bouteilles',
+  },
 };
 
 export const COPY: Record<Lang, Copy> = {

@@ -3,11 +3,27 @@
   "main": "src/index.ts",
   "name": "emptywine-com",
   "upload_source_maps": true,
+  "vars": {
+    "SMTP_HOST": "mail02.outsourceis.com",
+    "SMTP_PORT": "465",
+    "SMTP_SECURITY": "tls",
+    "SMTP_USER": "no-reply@emptywine.com",
+    "SMTP_FROM": "no-reply@emptywine.com",
+    "PUBLIC_ORIGIN": "https://emptywine.com"
+  },
   "ai": {
     "binding": "AI"
   },
   "kv_namespaces": [
     { "binding": "CONTACTS", "id": "e352b3b6fbd749efb49fd1a9db09169b" }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "emptywine",
+      "database_id": "112a847d-c7cd-48a7-8f1f-71b5594adad7",
+      "migrations_dir": "migrations"
+    }
   ],
   "r2_buckets": [
     { "binding": "ASSETS", "bucket_name": "emptywine-assets" }
