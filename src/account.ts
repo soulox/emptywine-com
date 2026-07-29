@@ -1,9 +1,8 @@
 // Customer-facing account area: signup, login, email verification, password
 // reset, the "My Orders" dashboard, a single order page, and order submission.
 // Exposed as one router (accountRouter) that index.ts calls before its 404.
-// Copy is a co-located bilingual dictionary (these are private, non-SEO pages,
-// so they stay out of the marketing i18n Copy interface — same pattern as email.ts).
-import type { Lang } from './i18n';
+// User-facing copy lives in the shared i18n dictionary (COPY[lang].account).
+import { COPY as I18N, type Lang } from './i18n';
 import {
   currentUser, createUser, findLogin, getUserByEmail, hashPassword, verifyPassword,
   createSession, destroySession, sessionCookie, clearSessionCookie,
@@ -16,50 +15,9 @@ import { labelStyles, labelMarkup } from './label';
 import { renderLabelPdf } from './labelpdf';
 
 // ---------- copy ----------
-interface AC {
-  loginTitle: string; signupTitle: string; forgotTitle: string; resetTitle: string; accountTitle: string;
-  email: string; password: string; name: string; company: string; phone: string; optional: string;
-  signIn: string; signUp: string; signOut: string; createAccount: string; haveAccount: string; noAccount: string;
-  forgotLink: string; forgotIntro: string; sendReset: string; resetIntro: string; newPassword: string; updatePassword: string;
-  verifyBanner: string; verifiedOk: string; verifyExpired: string; resetSent: string; resetDone: string; resetExpired: string;
-  badLogin: string; emailTaken: string; weakPassword: string; invalid: string; rateLimited: string;
-  myOrders: string; noOrders: string; startDesign: string; orderNo: string; placed: string; status: string; quantity: string;
-  statusLabels: Record<OrderStatus, string>;
-  viewOrder: string; backToOrders: string; downloadPdf: string; reopenEdit: string; orderNotes: string;
-  orderPlaced: string; orderThanks: string; profile: string; bottles: string;
-}
-const COPY: Record<Lang, AC> = {
-  en: {
-    loginTitle: 'Sign in', signupTitle: 'Create your account', forgotTitle: 'Reset your password', resetTitle: 'Choose a new password', accountTitle: 'Your account',
-    email: 'Email', password: 'Password', name: 'Name', company: 'Company', phone: 'Phone', optional: 'optional',
-    signIn: 'Sign in', signUp: 'Create account', signOut: 'Sign out', createAccount: 'Create account', haveAccount: 'Already have an account?', noAccount: 'New to emptywine?',
-    forgotLink: 'Forgot your password?', forgotIntro: 'Enter your email and we’ll send you a link to reset your password.', sendReset: 'Send reset link',
-    resetIntro: 'Choose a new password for your account.', newPassword: 'New password', updatePassword: 'Update password',
-    verifyBanner: 'Please confirm your email address — we sent you a link. You’ll need a confirmed email to place an order.',
-    verifiedOk: 'Your email is confirmed. Welcome to emptywine.', verifyExpired: 'That confirmation link is invalid or has expired.',
-    resetSent: 'If that email has an account, a reset link is on its way.', resetDone: 'Your password has been updated — you can sign in.', resetExpired: 'That reset link is invalid or has expired.',
-    badLogin: 'Email or password is incorrect.', emailTaken: 'An account with that email already exists.', weakPassword: 'Password must be at least 8 characters.', invalid: 'Please check the form and try again.', rateLimited: 'Too many attempts. Please try again later.',
-    myOrders: 'My orders', noOrders: 'You have no orders yet.', startDesign: 'Design a label', orderNo: 'Order', placed: 'Placed', status: 'Status', quantity: 'Quantity',
-    statusLabels: { received: 'Received', in_production: 'In production', shipped: 'Shipped', cancelled: 'Cancelled' },
-    viewOrder: 'View order', backToOrders: 'Back to orders', downloadPdf: 'Download print PDF', reopenEdit: 'Reopen & edit design', orderNotes: 'Notes',
-    orderPlaced: 'Order received', orderThanks: 'Thank you — we’ve received your design and will be in touch shortly to confirm details and pricing.', profile: 'Profile', bottles: 'bottles',
-  },
-  fr: {
-    loginTitle: 'Connexion', signupTitle: 'Créez votre compte', forgotTitle: 'Réinitialiser le mot de passe', resetTitle: 'Choisissez un nouveau mot de passe', accountTitle: 'Votre compte',
-    email: 'E-mail', password: 'Mot de passe', name: 'Nom', company: 'Société', phone: 'Téléphone', optional: 'facultatif',
-    signIn: 'Se connecter', signUp: 'Créer un compte', signOut: 'Se déconnecter', createAccount: 'Créer un compte', haveAccount: 'Vous avez déjà un compte ?', noAccount: 'Nouveau chez emptywine ?',
-    forgotLink: 'Mot de passe oublié ?', forgotIntro: 'Saisissez votre e-mail et nous vous enverrons un lien de réinitialisation.', sendReset: 'Envoyer le lien',
-    resetIntro: 'Choisissez un nouveau mot de passe pour votre compte.', newPassword: 'Nouveau mot de passe', updatePassword: 'Mettre à jour',
-    verifyBanner: 'Merci de confirmer votre adresse e-mail — nous vous avons envoyé un lien. Une adresse confirmée est nécessaire pour passer commande.',
-    verifiedOk: 'Votre e-mail est confirmé. Bienvenue chez emptywine.', verifyExpired: 'Ce lien de confirmation est invalide ou a expiré.',
-    resetSent: 'Si un compte existe pour cet e-mail, un lien de réinitialisation est en route.', resetDone: 'Votre mot de passe a été mis à jour — vous pouvez vous connecter.', resetExpired: 'Ce lien de réinitialisation est invalide ou a expiré.',
-    badLogin: 'E-mail ou mot de passe incorrect.', emailTaken: 'Un compte existe déjà avec cet e-mail.', weakPassword: 'Le mot de passe doit comporter au moins 8 caractères.', invalid: 'Veuillez vérifier le formulaire et réessayer.', rateLimited: 'Trop de tentatives. Réessayez plus tard.',
-    myOrders: 'Mes commandes', noOrders: 'Vous n’avez pas encore de commande.', startDesign: 'Concevoir une étiquette', orderNo: 'Commande', placed: 'Passée le', status: 'Statut', quantity: 'Quantité',
-    statusLabels: { received: 'Reçue', in_production: 'En production', shipped: 'Expédiée', cancelled: 'Annulée' },
-    viewOrder: 'Voir la commande', backToOrders: 'Retour aux commandes', downloadPdf: 'Télécharger le PDF d’impression', reopenEdit: 'Rouvrir et modifier', orderNotes: 'Notes',
-    orderPlaced: 'Commande reçue', orderThanks: 'Merci — nous avons bien reçu votre design et reviendrons vers vous très vite pour confirmer les détails et le tarif.', profile: 'Profil', bottles: 'bouteilles',
-  },
-};
+// Account/order copy lives in the shared i18n dictionary (src/i18n.ts) under
+// I18N[lang].account, so all user-facing strings have one source of truth.
+const AC = (l: Lang) => I18N[l].account;
 
 // ---------- small helpers ----------
 const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -153,7 +111,7 @@ ${o.extraCss || ''}
 <body>
 <div class="topbar">
   <a class="brand" href="/${o.lang === 'fr' ? 'fr' : ''}">emptywine</a>
-  <div class="r"><a href="${pfx(o.lang)}/account">${COPY[o.lang].myOrders}</a></div>
+  <div class="r"><a href="${pfx(o.lang)}/account">${AC(o.lang).myOrders}</a></div>
 </div>
 ${o.body}
 </body></html>`;
@@ -161,7 +119,7 @@ ${o.body}
 
 // ---------- form renderers ----------
 function loginPage(lang: Lang, banner?: string, bannerKind = 'info', next = ''): string {
-  const t = COPY[lang];
+  const t = AC(lang);
   const nx = next ? `?next=${encodeURIComponent(next)}` : '';
   const body = `<div class="wrap"><div class="card">
 ${banner ? `<div class="banner ${bannerKind}">${esc(banner)}</div>` : ''}
@@ -178,7 +136,7 @@ ${banner ? `<div class="banner ${bannerKind}">${esc(banner)}</div>` : ''}
   return shell({ lang, title: t.loginTitle, body });
 }
 function signupPage(lang: Lang, banner?: string, bannerKind = 'error', next = ''): string {
-  const t = COPY[lang];
+  const t = AC(lang);
   const nx = next ? `?next=${encodeURIComponent(next)}` : '';
   const body = `<div class="wrap"><div class="card">
 ${banner ? `<div class="banner ${bannerKind}">${esc(banner)}</div>` : ''}
@@ -197,7 +155,7 @@ ${banner ? `<div class="banner ${bannerKind}">${esc(banner)}</div>` : ''}
   return shell({ lang, title: t.signupTitle, body });
 }
 function forgotPage(lang: Lang, banner?: string, bannerKind = 'info'): string {
-  const t = COPY[lang];
+  const t = AC(lang);
   const body = `<div class="wrap"><div class="card">
 ${banner ? `<div class="banner ${bannerKind}">${esc(banner)}</div>` : ''}
 <h1>${t.forgotTitle}</h1><p class="lede">${t.forgotIntro}</p>
@@ -211,7 +169,7 @@ ${banner ? `<div class="banner ${bannerKind}">${esc(banner)}</div>` : ''}
   return shell({ lang, title: t.forgotTitle, body });
 }
 function resetPage(lang: Lang, token: string, banner?: string, bannerKind = 'error'): string {
-  const t = COPY[lang];
+  const t = AC(lang);
   const body = `<div class="wrap"><div class="card">
 ${banner ? `<div class="banner ${bannerKind}">${esc(banner)}</div>` : ''}
 <h1>${t.resetTitle}</h1><p class="lede">${t.resetIntro}</p>
@@ -226,10 +184,10 @@ ${banner ? `<div class="banner ${bannerKind}">${esc(banner)}</div>` : ''}
 }
 
 function statusPill(lang: Lang, s: OrderStatus): string {
-  return `<span class="pill ${s}">${COPY[lang].statusLabels[s]}</span>`;
+  return `<span class="pill ${s}">${AC(lang).statusLabels[s]}</span>`;
 }
 function dashboardPage(lang: Lang, user: User, orders: OrderRow[], banner?: string, bannerKind = 'info'): string {
-  const t = COPY[lang];
+  const t = AC(lang);
   const rows = orders.map((o) => `<a class="order-row" href="${pfx(lang)}/account/order/${o.orderNo}">
   <div class="mini">${labelMarkup(o.design, { inlineScales: true })}</div>
   <div class="meta"><div class="on">${esc(o.orderNo)}</div><div class="om">${esc(o.design.brand)} · ${new Date(o.createdAt).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-GB')}</div></div>
@@ -251,7 +209,7 @@ ${list}
   return shell({ lang, title: t.accountTitle, body, extraCss });
 }
 function orderPage(lang: Lang, user: User, order: OrderRow, justPlaced: boolean): string {
-  const t = COPY[lang];
+  const t = AC(lang);
   void user;
   const d = order.design;
   const body = `<div class="wrap">
@@ -303,7 +261,7 @@ export async function accountRouter(request: Request, env: Env, ctx: ExecutionCo
   if (method === 'GET' && p === '/forgot') return html(forgotPage(lang));
   if (method === 'GET' && p === '/reset') {
     const token = url.searchParams.get('token') || '';
-    if (!token) return html(forgotPage(lang, COPY[lang].resetExpired, 'error'));
+    if (!token) return html(forgotPage(lang, AC(lang).resetExpired, 'error'));
     return html(resetPage(lang, token));
   }
   if (method === 'GET' && p === '/verify') {
@@ -311,12 +269,12 @@ export async function accountRouter(request: Request, env: Env, ctx: ExecutionCo
     const userId = token ? await consumeToken(env, 'verify', token) : null;
     if (!userId) {
       const u = await currentUser(request, env);
-      if (u) return html(dashboardPage(lang, u, await listOrdersByUser(env, u.id), COPY[lang].verifyExpired, 'error'));
+      if (u) return html(dashboardPage(lang, u, await listOrdersByUser(env, u.id), AC(lang).verifyExpired, 'error'));
       return redirect(`${pfx(lang)}/login`);
     }
     await setEmailVerified(env, userId);
     const u = await currentUser(request, env);
-    if (u) return html(dashboardPage(lang, { ...u, emailVerified: true }, await listOrdersByUser(env, u.id), COPY[lang].verifiedOk, 'ok'));
+    if (u) return html(dashboardPage(lang, { ...u, emailVerified: true }, await listOrdersByUser(env, u.id), AC(lang).verifiedOk, 'ok'));
     return redirect(`${pfx(lang)}/login`);
   }
   if (method === 'GET' && p === '/account') {
@@ -342,7 +300,7 @@ export async function accountRouter(request: Request, env: Env, ctx: ExecutionCo
   // ----- POST APIs (non-prefixed) -----
   if (method === 'POST' && url.pathname === '/api/signup') {
     if (!sameOrigin(request, url)) return new Response('bad origin', { status: 403 });
-    if (!(await rateLimit(env, `rl:signup:${ip}`, 8))) return html(signupPage(lang, COPY[lang].rateLimited, 'error'), 429);
+    if (!(await rateLimit(env, `rl:signup:${ip}`, 8))) return html(signupPage(lang, AC(lang).rateLimited, 'error'), 429);
     const f = await request.formData();
     const lg: Lang = String(f.get('lang')) === 'fr' ? 'fr' : 'en';
     const email = String(f.get('email') || '').trim().toLowerCase();
@@ -351,12 +309,12 @@ export async function accountRouter(request: Request, env: Env, ctx: ExecutionCo
     const company = String(f.get('company') || '').trim().slice(0, 120);
     const phone = String(f.get('phone') || '').trim().slice(0, 40);
     const next = url.searchParams.get('next') || `${pfx(lg)}/account`;
-    if (!emailRe.test(email) || email.length > 254 || !name || !company) return html(signupPage(lg, COPY[lg].invalid, 'error'), 400);
-    if (password.length < 8 || password.length > 200) return html(signupPage(lg, COPY[lg].weakPassword, 'error'), 400);
-    if (await getUserByEmail(env, email)) return html(signupPage(lg, COPY[lg].emailTaken, 'error'), 409);
+    if (!emailRe.test(email) || email.length > 254 || !name || !company) return html(signupPage(lg, AC(lg).invalid, 'error'), 400);
+    if (password.length < 8 || password.length > 200) return html(signupPage(lg, AC(lg).weakPassword, 'error'), 400);
+    if (await getUserByEmail(env, email)) return html(signupPage(lg, AC(lg).emailTaken, 'error'), 409);
     let user: User;
     try { user = await createUser(env, { email, passwordHash: await hashPassword(password), name, company, phone }); }
-    catch { return html(signupPage(lg, COPY[lg].emailTaken, 'error'), 409); }
+    catch { return html(signupPage(lg, AC(lg).emailTaken, 'error'), 409); }
     const vtoken = await issueToken(env, 'verify', user.id);
     ctx.waitUntil(sendVerifyEmail(env, url.origin, email, lg, vtoken));
     const token = await createSession(env, user.id);
@@ -364,14 +322,14 @@ export async function accountRouter(request: Request, env: Env, ctx: ExecutionCo
   }
   if (method === 'POST' && url.pathname === '/api/login') {
     if (!sameOrigin(request, url)) return new Response('bad origin', { status: 403 });
-    if (!(await rateLimit(env, `rl:login:${ip}`, 12))) return html(loginPage(lang, COPY[lang].rateLimited, 'error'), 429);
+    if (!(await rateLimit(env, `rl:login:${ip}`, 12))) return html(loginPage(lang, AC(lang).rateLimited, 'error'), 429);
     const f = await request.formData();
     const lg: Lang = String(f.get('lang')) === 'fr' ? 'fr' : 'en';
     const email = String(f.get('email') || '').trim().toLowerCase();
     const password = String(f.get('password') || '');
     const next = url.searchParams.get('next') || `${pfx(lg)}/account`;
     const login = await findLogin(env, email);
-    if (!login || !(await verifyPassword(password, login.passwordHash))) return html(loginPage(lg, COPY[lg].badLogin, 'error', url.searchParams.get('next') || ''), 401);
+    if (!login || !(await verifyPassword(password, login.passwordHash))) return html(loginPage(lg, AC(lg).badLogin, 'error', url.searchParams.get('next') || ''), 401);
     const token = await createSession(env, login.id);
     return redirect(next, sessionCookie(token));
   }
@@ -381,13 +339,13 @@ export async function accountRouter(request: Request, env: Env, ctx: ExecutionCo
   }
   if (method === 'POST' && url.pathname === '/api/forgot') {
     if (!sameOrigin(request, url)) return new Response('bad origin', { status: 403 });
-    if (!(await rateLimit(env, `rl:forgot:${ip}`, 6))) return html(forgotPage(lang, COPY[lang].rateLimited, 'error'), 429);
+    if (!(await rateLimit(env, `rl:forgot:${ip}`, 6))) return html(forgotPage(lang, AC(lang).rateLimited, 'error'), 429);
     const f = await request.formData();
     const lg: Lang = String(f.get('lang')) === 'fr' ? 'fr' : 'en';
     const email = String(f.get('email') || '').trim().toLowerCase();
     const user = emailRe.test(email) ? await getUserByEmail(env, email) : null;
     if (user) { const rtoken = await issueToken(env, 'reset', user.id); ctx.waitUntil(sendResetEmail(env, url.origin, email, lg, rtoken)); }
-    return html(forgotPage(lg, COPY[lg].resetSent, 'ok')); // never reveal existence
+    return html(forgotPage(lg, AC(lg).resetSent, 'ok')); // never reveal existence
   }
   if (method === 'POST' && url.pathname === '/api/reset') {
     if (!sameOrigin(request, url)) return new Response('bad origin', { status: 403 });
@@ -395,17 +353,17 @@ export async function accountRouter(request: Request, env: Env, ctx: ExecutionCo
     const lg: Lang = String(f.get('lang')) === 'fr' ? 'fr' : 'en';
     const token = String(f.get('token') || '');
     const password = String(f.get('password') || '');
-    if (password.length < 8 || password.length > 200) return html(resetPage(lg, token, COPY[lg].weakPassword, 'error'), 400);
+    if (password.length < 8 || password.length > 200) return html(resetPage(lg, token, AC(lg).weakPassword, 'error'), 400);
     const userId = await consumeToken(env, 'reset', token);
-    if (!userId) return html(forgotPage(lg, COPY[lg].resetExpired, 'error'), 400);
+    if (!userId) return html(forgotPage(lg, AC(lg).resetExpired, 'error'), 400);
     await setPassword(env, userId, await hashPassword(password));
-    return html(loginPage(lg, COPY[lg].resetDone, 'ok'));
+    return html(loginPage(lg, AC(lg).resetDone, 'ok'));
   }
   if (method === 'POST' && url.pathname === '/api/order') {
     if (!sameOrigin(request, url)) return new Response(JSON.stringify({ error: 'bad_origin' }), { status: 403, headers: { 'content-type': 'application/json' } });
     const u = await currentUser(request, env);
     if (!u) return new Response(JSON.stringify({ error: 'auth', login: `${pfx(lang)}/login?next=${encodeURIComponent(pfx(lang) + '/design')}` }), { status: 401, headers: { 'content-type': 'application/json' } });
-    if (!u.emailVerified) return new Response(JSON.stringify({ error: 'unverified', message: COPY[lang].verifyBanner }), { status: 403, headers: { 'content-type': 'application/json' } });
+    if (!u.emailVerified) return new Response(JSON.stringify({ error: 'unverified', message: AC(lang).verifyBanner }), { status: 403, headers: { 'content-type': 'application/json' } });
     if (!(await rateLimit(env, `rl:order:${ip}`, 20))) return new Response(JSON.stringify({ error: 'rate_limited' }), { status: 429, headers: { 'content-type': 'application/json' } });
     let body: Record<string, unknown>;
     try { body = await request.json(); } catch { return new Response(JSON.stringify({ error: 'invalid' }), { status: 400, headers: { 'content-type': 'application/json' } }); }
