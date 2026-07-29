@@ -31,6 +31,9 @@ function template(t: T, link: string): string {
   </div>
 </div>`;
 }
+function templateText(t: T, link: string): string {
+  return `emptywine\n\n${t.heading}\n\n${t.body}\n\n${t.cta}:\n${link}\n\n${t.ignore}\n`;
+}
 
 // ---------- base64 helpers (UTF-8 safe) ----------
 function bytesToB64(bytes: Uint8Array): string { let s = ''; for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]); return btoa(s); }
@@ -89,7 +92,7 @@ function withTimeout<X>(p: Promise<X>, ms: number, label: string): Promise<X> {
   return Promise.race([p, new Promise<X>((_, rej) => setTimeout(() => rej(new Error('timeout: ' + label)), ms))]);
 }
 
-async function smtpSend(cfg: SmtpConfig, msg: { to: string; subject: string; html: string }): Promise<void> {
+async function smtpSend(cfg: SmtpConfig, msg: { to: string; subject: string; html: string; text: string }): Promise<void> {
   const domain = cfg.from.split('@')[1] || 'emptywine.com';
   const secureTransport = cfg.mode === 'tls' ? 'on' : cfg.mode === 'starttls' ? 'starttls' : 'off';
   const socket = connect({ hostname: cfg.host, port: cfg.port }, { secureTransport, allowHalfOpen: false });
@@ -114,6 +117,7 @@ async function smtpSend(cfg: SmtpConfig, msg: { to: string; subject: string; htm
     await conn.write(`MAIL FROM:<${cfg.from}>\r\n`); await expect(250, 'mail-from');
     await conn.write(`RCPT TO:<${msg.to}>\r\n`); await expect(250, 'rcpt-to');
     await conn.write('DATA\r\n'); await expect(354, 'data');
+    const boundary = 'ew_' + crypto.randomUUID().replace(/-/g, '');
     const headers = [
       `From: emptywine <${cfg.from}>`,
       `To: <${msg.to}>`,
@@ -121,10 +125,20 @@ async function smtpSend(cfg: SmtpConfig, msg: { to: string; subject: string; htm
       `Date: ${new Date().toUTCString()}`,
       `Message-ID: <${crypto.randomUUID()}@${domain}>`,
       'MIME-Version: 1.0',
-      'Content-Type: text/html; charset=UTF-8',
-      'Content-Transfer-Encoding: base64',
+      `Content-Type: multipart/alternative; boundary="${boundary}"`,
     ];
-    await conn.write(headers.join('\r\n') + '\r\n\r\n' + b64wrap(msg.html) + '\r\n.\r\n');
+    // multipart/alternative: plain-text first, then HTML (base64 lines never
+    // start with '.', so no dot-stuffing needed)
+    const mime = [
+      `--${boundary}`,
+      'Content-Type: text/plain; charset=UTF-8', 'Content-Transfer-Encoding: base64', '',
+      b64wrap(msg.text),
+      `--${boundary}`,
+      'Content-Type: text/html; charset=UTF-8', 'Content-Transfer-Encoding: base64', '',
+      b64wrap(msg.html),
+      `--${boundary}--`,
+    ].join('\r\n');
+    await conn.write(headers.join('\r\n') + '\r\n\r\n' + mime + '\r\n.\r\n');
     await expect(250, 'body');
     await conn.write('QUIT\r\n');
   } finally {
@@ -133,14 +147,14 @@ async function smtpSend(cfg: SmtpConfig, msg: { to: string; subject: string; htm
   }
 }
 
-async function deliver(env: Env, to: string, subject: string, html: string, devLink: string): Promise<void> {
+async function deliver(env: Env, to: string, subject: string, html: string, text: string, devLink: string): Promise<void> {
   const cfg = smtpConfig(env);
   if (!cfg) {
     console.log(`[email:dev] to=${to} · ${subject}\n[email:dev] link → ${devLink}`);
     return;
   }
   try {
-    await withTimeout(smtpSend(cfg, { to, subject, html }), 20000, 'smtp-send');
+    await withTimeout(smtpSend(cfg, { to, subject, html, text }), 20000, 'smtp-send');
     console.log(`[email] sent ok → ${to} (${cfg.mode})`);
   } catch (e) {
     // swallow — auth/order flow already succeeded; log for diagnosis
@@ -151,10 +165,10 @@ async function deliver(env: Env, to: string, subject: string, html: string, devL
 export async function sendVerifyEmail(env: Env, origin: string, to: string, lang: Lang, token: string): Promise<void> {
   const link = `${origin}${lang === 'fr' ? '/fr' : ''}/verify?token=${token}`;
   const t = EMAIL[lang].verify;
-  await deliver(env, to, t.subject, template(t, link), link);
+  await deliver(env, to, t.subject, template(t, link), templateText(t, link), link);
 }
 export async function sendResetEmail(env: Env, origin: string, to: string, lang: Lang, token: string): Promise<void> {
   const link = `${origin}${lang === 'fr' ? '/fr' : ''}/reset?token=${token}`;
   const t = EMAIL[lang].reset;
-  await deliver(env, to, t.subject, template(t, link), link);
+  await deliver(env, to, t.subject, template(t, link), templateText(t, link), link);
 }
