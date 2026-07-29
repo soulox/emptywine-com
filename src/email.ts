@@ -1,6 +1,9 @@
-// Transactional email via Resend. Never throws (a failed send must not break
-// signup/reset). When RESEND_API_KEY is unset (local dev), the link is logged
-// to the console instead of sent, so the flow stays testable offline.
+// Transactional email via authenticated SMTP submission (SmarterMail), sent
+// straight from the Worker over a Cloudflare TCP socket — no third-party API.
+// Flow: connect :587 → EHLO → STARTTLS → EHLO → AUTH LOGIN → MAIL/RCPT/DATA.
+// Never throws (a failed send must not break signup/reset). When SMTP_* is
+// unconfigured (local dev) the link is logged to the console instead.
+import { connect } from 'cloudflare:sockets';
 import { secrets } from './auth';
 
 type Lang = 'en' | 'fr';
@@ -29,20 +32,108 @@ function template(t: T, link: string): string {
 </div>`;
 }
 
+// ---------- base64 helpers (UTF-8 safe) ----------
+function bytesToB64(bytes: Uint8Array): string { let s = ''; for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]); return btoa(s); }
+function b64utf8(str: string): string { return bytesToB64(new TextEncoder().encode(str)); }
+function b64wrap(str: string): string { const raw = b64utf8(str); const lines: string[] = []; for (let i = 0; i < raw.length; i += 76) lines.push(raw.slice(i, i + 76)); return lines.join('\r\n'); }
+// RFC 2047 encoded-word for non-ASCII header values (e.g. accented subjects)
+function encWord(s: string): string { return /^[\x00-\x7F]*$/.test(s) ? s : '=?UTF-8?B?' + b64utf8(s) + '?='; }
+
+interface SmtpConfig { host: string; port: number; user: string; pass: string; from: string; }
+function smtpConfig(env: Env): SmtpConfig | null {
+  const s = secrets(env);
+  if (!s.SMTP_HOST || !s.SMTP_USER || !s.SMTP_PASSWORD) return null;
+  return {
+    host: s.SMTP_HOST, port: parseInt(s.SMTP_PORT || '587', 10),
+    user: s.SMTP_USER, pass: s.SMTP_PASSWORD, from: s.SMTP_FROM || s.SMTP_USER,
+  };
+}
+
+// Minimal line-oriented SMTP reader over a socket's byte stream.
+class SmtpConn {
+  private reader: ReadableStreamDefaultReader<Uint8Array>;
+  private writer: WritableStreamDefaultWriter<Uint8Array>;
+  private buf = '';
+  private dec = new TextDecoder();
+  private enc = new TextEncoder();
+  constructor(private stream: { readable: ReadableStream<Uint8Array>; writable: WritableStream<Uint8Array> }) {
+    this.reader = stream.readable.getReader();
+    this.writer = stream.writable.getWriter();
+  }
+  // Reads one complete SMTP reply (handles 250-multiline → final "250 ").
+  async reply(): Promise<{ code: number; text: string }> {
+    for (;;) {
+      const lines = this.buf.split('\r\n');
+      for (let i = 0; i < lines.length; i++) {
+        const m = lines[i].match(/^(\d{3}) /);
+        if (m) { const text = lines.slice(0, i + 1).join('\n'); this.buf = lines.slice(i + 1).join('\r\n'); return { code: parseInt(m[1], 10), text }; }
+      }
+      const { value, done } = await this.reader.read();
+      if (done) throw new Error('SMTP connection closed early');
+      this.buf += this.dec.decode(value, { stream: true });
+    }
+  }
+  async write(data: string): Promise<void> { await this.writer.write(this.enc.encode(data)); }
+  release(): void { try { this.reader.releaseLock(); } catch { /* */ } try { this.writer.releaseLock(); } catch { /* */ } }
+}
+
+function withTimeout<X>(p: Promise<X>, ms: number, label: string): Promise<X> {
+  return Promise.race([p, new Promise<X>((_, rej) => setTimeout(() => rej(new Error('timeout: ' + label)), ms))]);
+}
+
+async function smtpSend(cfg: SmtpConfig, msg: { to: string; subject: string; html: string }): Promise<void> {
+  const domain = cfg.from.split('@')[1] || 'emptywine.com';
+  const socket = connect({ hostname: cfg.host, port: cfg.port }, { secureTransport: 'starttls', allowHalfOpen: false });
+  let conn = new SmtpConn(socket);
+  const expect = async (want: number, step: string) => {
+    const r = await withTimeout(conn.reply(), 15000, step);
+    if (r.code !== want) throw new Error(`SMTP ${step} → ${r.code}: ${r.text}`);
+    return r;
+  };
+  try {
+    await expect(220, 'greeting');
+    await conn.write(`EHLO ${domain}\r\n`); await expect(250, 'ehlo');
+    await conn.write('STARTTLS\r\n'); await expect(220, 'starttls');
+    conn.release();
+    const secure = socket.startTls();
+    conn = new SmtpConn(secure);
+    await conn.write(`EHLO ${domain}\r\n`); await expect(250, 'ehlo-tls');
+    await conn.write('AUTH LOGIN\r\n'); await expect(334, 'auth');
+    await conn.write(b64utf8(cfg.user) + '\r\n'); await expect(334, 'auth-user');
+    await conn.write(b64utf8(cfg.pass) + '\r\n'); await expect(235, 'auth-pass');
+    await conn.write(`MAIL FROM:<${cfg.from}>\r\n`); await expect(250, 'mail-from');
+    await conn.write(`RCPT TO:<${msg.to}>\r\n`); await expect(250, 'rcpt-to');
+    await conn.write('DATA\r\n'); await expect(354, 'data');
+    const headers = [
+      `From: emptywine <${cfg.from}>`,
+      `To: <${msg.to}>`,
+      `Subject: ${encWord(msg.subject)}`,
+      `Date: ${new Date().toUTCString()}`,
+      `Message-ID: <${crypto.randomUUID()}@${domain}>`,
+      'MIME-Version: 1.0',
+      'Content-Type: text/html; charset=UTF-8',
+      'Content-Transfer-Encoding: base64',
+    ];
+    await conn.write(headers.join('\r\n') + '\r\n\r\n' + b64wrap(msg.html) + '\r\n.\r\n');
+    await expect(250, 'body');
+    await conn.write('QUIT\r\n');
+  } finally {
+    conn.release();
+    try { await socket.close(); } catch { /* already closing */ }
+  }
+}
+
 async function deliver(env: Env, to: string, subject: string, html: string, devLink: string): Promise<void> {
-  const key = secrets(env).RESEND_API_KEY;
-  if (!key) {
+  const cfg = smtpConfig(env);
+  if (!cfg) {
     console.log(`[email:dev] to=${to} · ${subject}\n[email:dev] link → ${devLink}`);
     return;
   }
   try {
-    await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
-      body: JSON.stringify({ from: 'emptywine <no-reply@emptywine.com>', to: [to], subject, html }),
-    });
-  } catch {
-    // swallow — auth/order flow already succeeded; the email is best-effort
+    await withTimeout(smtpSend(cfg, { to, subject, html }), 20000, 'smtp-send');
+  } catch (e) {
+    // swallow — auth/order flow already succeeded; log for diagnosis
+    console.log('[email] send failed:', (e as Error).message);
   }
 }
 

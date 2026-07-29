@@ -5,8 +5,12 @@
 // and label-PDF routes so the LabelConfig coercion lives in exactly one place.
 import type { LabelConfig } from './labelpdf';
 
-// Secrets are Worker secrets, not part of the generated Env type.
-export type Secrets = { RESEND_API_KEY?: string; ADMIN_TOKEN?: string; SLACK_WEBHOOK_URL?: string };
+// Secrets/vars are Worker secrets, not part of the generated Env type.
+export type Secrets = {
+  ADMIN_TOKEN?: string; SLACK_WEBHOOK_URL?: string;
+  // SMTP submission (SmarterMail) for transactional email
+  SMTP_HOST?: string; SMTP_PORT?: string; SMTP_USER?: string; SMTP_PASSWORD?: string; SMTP_FROM?: string;
+};
 export function secrets(env: Env): Secrets { return env as unknown as Secrets; }
 
 export type OrderStatus = 'received' | 'in_production' | 'shipped' | 'cancelled';
